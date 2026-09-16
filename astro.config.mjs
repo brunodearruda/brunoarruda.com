@@ -7,7 +7,7 @@ import { defineConfig } from "astro/config";
 // https://astro.build/config
 export default defineConfig({
   // Alimente canonical, OG, sitemap, robots.txt et llms.txt. Une seule edition les corrige tous.
-  site: "https://reef.alohapixel.app",
+  site: "https://brunoarruda.com",
 
   // Une seule forme d'URL canonique : le build en repertoires emet un slash final, et
   // canonical + OG s'accordent sur cette forme.
@@ -22,7 +22,7 @@ export default defineConfig({
   // les URLs. La liste vit dans src/i18n/config.ts, une seule source de verite.
   i18n: {
     defaultLocale: "en",
-    locales: ["en", "fr"],
+    locales: ["en"],
     routing: { prefixDefaultLocale: false, redirectToDefaultLocale: false },
   },
 
@@ -32,10 +32,10 @@ export default defineConfig({
     // JavaScript. C'est le principal argument d'un theme de blog.
     mdx(),
     sitemap({
-      filter: (page) => !["/404/", "/examples/"].some((p) => page.includes(p)),
+      filter: (page) => !["/404/", "/examples/", "/search/"].some((p) => page.includes(p)),
       // Le sitemap porte les memes alternatives que les balises hreflang du
       // head : Google recoupe les deux, et un desaccord fait ignorer les deux.
-      i18n: { defaultLocale: "en", locales: { en: "en", fr: "fr" } },
+      i18n: { defaultLocale: "en", locales: { en: "en" } },
     }),
   ],
 

@@ -7,7 +7,7 @@
 //      (TypeScript refusera de compiler tant qu'une seule cle manque : c'est le
 //      filet de securite).
 //
-// Les segments d'URL, eux, ne se traduisent pas : /blog/, /topics/ et /authors/
+// Les segments d'URL, eux, ne se traduisent pas : /blog/, /labs/ et /topics/
 // sont ecrits une seule fois dans src/config/navData.json.ts, et localizePath
 // se contente de leur ajouter le prefixe de langue. Qui veut /fr/journal/
 // change le segment la-bas, pour toutes les langues a la fois.
@@ -16,7 +16,7 @@
 // et se generent pour chaque langue de cette liste.
 
 /** Les langues servies par le site. La premiere est la langue par defaut. */
-export const locales = ["en", "fr"] as const;
+export const locales = ["en"] as const;
 
 export type Locale = (typeof locales)[number];
 
@@ -42,7 +42,6 @@ export interface LocaleMeta {
 
 export const localeMeta: Record<Locale, LocaleMeta> = {
   en: { label: "English", htmlLang: "en", dir: "ltr", intl: "en-US", short: "EN" },
-  fr: { label: "Français", htmlLang: "fr", dir: "ltr", intl: "fr-FR", short: "FR" },
 };
 
 /** Vrai si la chaine est bien une langue du site. Utilise pour valider ce qui

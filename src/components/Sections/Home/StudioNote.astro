@@ -1,10 +1,5 @@
 ---
-// src/components/Sections/Home/StudioNote.astro - le mot du studio : qui tient ce carnet, et ou lire la suite.
-//
-// Un blog d'artisan doit dire qui parle avant que le lecteur ait a le chercher.
-// Deux phrases et un lien suffisent : la page a propos fait le reste, et
-// l'accueil ne devient pas une page de presentation deguisee.
-import SectionHeader from "@components/Sections/Global/SectionHeader.astro";
+// src/components/Sections/Home/StudioNote.astro - Home positioning statement for Bruno Arruda.
 import { Icon } from "@components/svg/icons";
 import { Button } from "@components/ui/button";
 import { getSiteRoutes } from "@config/navData.json.ts";
@@ -15,26 +10,41 @@ const t = useTranslations(locale);
 const routes = getSiteRoutes(locale);
 ---
 
-<section class="container-page py-16 md:py-24" aria-labelledby="studio-title" data-slot="studio-note">
-  <div class="border-border rounded-panel bg-card border p-8 md:p-12">
-    <SectionHeader
-      as="h2"
-      headingId="studio-title"
-      eyebrow={t.about.eyebrow}
-      title={t.home.aboutTitle}
-      accentWord={t.home.aboutAccent}
-      lede={t.home.aboutLede}
-    />
+<section
+  class="deep-scene relative overflow-hidden bg-ink"
+  aria-labelledby="studio-title"
+  data-slot="studio-note"
+>
+  <div
+    class="pointer-events-none absolute inset-0 opacity-40"
+    aria-hidden="true"
+    style="background: radial-gradient(circle at 80% 50%, color-mix(in srgb, var(--color-primary) 22%, transparent), transparent 45%);"
+  >
+  </div>
 
-    <div class="mt-8 flex flex-wrap gap-3">
-      {/* Le turquoise est la seule couleur d'action du theme : un bouton blanc
-          ici ferait un second point d'action, d'une autre couleur, sur un ecran
-          qui n'en demande qu'un. */}
-      <Button href={routes.about} variant="primary" size="md">
-        {t.home.aboutCta}
-        <Icon name="arrow-right" size={17} />
-      </Button>
-      <Button href={routes.contact} variant="outline" size="md">{t.nav.contact}</Button>
+  <div class="container-page relative py-20 md:py-28">
+    <div class="max-w-3xl">
+      <p class="mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+        {t.home.aboutEyebrow}
+      </p>
+
+      <h2
+        id="studio-title"
+        class="font-display whitespace-pre-line text-4xl font-semibold leading-tight tracking-tight text-white md:text-5xl"
+      >
+        {t.home.aboutTitle}
+      </h2>
+
+      <p class="mt-6 max-w-2xl text-base leading-7 text-white/75 md:text-lg">
+        {t.home.aboutLede}
+      </p>
+
+      <div class="mt-8">
+        <Button href={routes.about} variant="primary" size="md">
+          {t.home.aboutCta}
+          <Icon name="arrow-right" size={17} />
+        </Button>
+      </div>
     </div>
   </div>
 </section>

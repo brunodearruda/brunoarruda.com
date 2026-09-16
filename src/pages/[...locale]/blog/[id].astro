@@ -87,7 +87,7 @@ const articleSchema = article({
   dateModified: post.data.updatedDate,
   image: new URL(share.src, base).href,
   authorName: author.data.name,
-  authorUrl: new URL(`${routes.authors}${entrySlug(author.id)}/`, base).href,
+  authorUrl: new URL(routes.about, base).href,
   publisherName: siteData.name,
 });
 

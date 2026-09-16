@@ -64,12 +64,17 @@ function resolveToken(name, scope, depth = 0) {
 }
 
 const groundDark = resolveToken("color-background", darkBlock);
-const wave = resolveToken("color-accent", darkBlock);
-const crest = resolveToken("color-primary", darkBlock);
+const brand = resolveToken("color-primary", darkBlock);
 
-/* Le dessin de la marque. Une ancre schematique posee sur sa ligne d'horizon. */
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="${groundDark}"/><path d="M32 52V26" stroke="${wave}" stroke-width="7" stroke-linecap="round"/><path d="M32 34 22 24M32 38l10-10" stroke="${wave}" stroke-width="6" stroke-linecap="round"/><path d="M14 52h36" stroke="${crest}" stroke-width="5" stroke-linecap="round" opacity="0.9"/></svg>`;
-
+/* Bruno Arruda Architecture Layers brand mark. */
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="${groundDark}"/>
+  <g fill="${brand}">
+    <path d="M32 9 54 20 32 31 10 20 32 9Z"/>
+    <path d="M32 22 54 33 32 44 10 33 32 22Z" opacity=".78"/>
+    <path d="M32 35 54 46 32 57 10 46 32 35Z" opacity=".56"/>
+  </g>
+</svg>`;
 /**
  * Assemble un .ico a partir de PNG deja encodes.
  *

@@ -42,8 +42,7 @@ export const sectionHeader = tv({
 
 type Props = VariantProps<typeof sectionHeader> & {
   title: string;
-  /** Le mot du titre garde la police du titre, passe au turquoise et porte la
-   *  vague (.accent-script). Un seul par titre, toujours. */
+  /** Le mot du titre garde la police du titre et passe au turquoise. Un seul par titre, toujours. */
   accentWord?: string;
   /** Intitule de rubrique au-dessus du titre : nomme la section, jamais une phrase. */
   eyebrow?: string;
@@ -104,7 +103,7 @@ const after = at >= 0 ? title.slice(at + accent.length) : "";
       word ? (
         <Fragment>
           {before}
-          <span class="accent-script">{word}</span>
+          <span class="text-primary">{word}</span>
           {after}
         </Fragment>
       ) : (

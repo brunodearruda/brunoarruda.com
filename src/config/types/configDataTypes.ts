@@ -5,13 +5,11 @@ export interface SiteDataProps {
   title: string;
   description: string;
   useViewTransitions?: boolean;
-  /** Cle i18n de la ligne "ce site est une demonstration" affichee en pied
-   *  de page. Vide ou absente, la ligne n'est pas rendue du tout. */
-  demoNotice?: string;
   author: {
     name: string;
     email: string;
-    twitter?: string;
+    linkedin?: string;
+    github?: string;
   };
   defaultImage: {
     src: string;
@@ -92,11 +90,11 @@ export interface SiteRoutes {
   home: string;
   /** Index des articles, cible de tous les liens "voir tous les articles". */
   posts: string;
+  /** Index of hands-on cloud security labs and technical projects. */
+  labs: string;
   /** Index des sujets. */
   topics: string;
-  /** Index des auteurs, cible des signatures. */
-  authors: string;
-  /** Page a propos du studio. */
+  /** About page. */
   about: string;
   /** Page de contact. */
   contact: string;
@@ -110,6 +108,4 @@ export interface SiteRoutes {
   imprint: string;
   /** Politique de confidentialite. */
   privacy: string;
-  /** Conditions d'utilisation, servies depuis src/config/legalData.json.ts. */
-  terms: string;
 }

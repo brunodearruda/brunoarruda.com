@@ -1,0 +1,6 @@
+{
+  "name": "Secure Architecture",
+  "description": "Security-focused AWS architecture patterns, multi-account design, resilience, governance, and architectural decision-making.",
+  "accent": "ink",
+  "order": 5
+}

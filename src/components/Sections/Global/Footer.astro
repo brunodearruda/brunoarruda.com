@@ -11,22 +11,20 @@
 import { Icon, type IconName } from "@components/svg/icons";
 import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
-import { LocaleSwitcher } from "@components/ui/locale-switcher";
 import { getFooterData, getSiteRoutes } from "@config/navData.json.ts";
 import siteData from "@config/siteData.json";
-import { fmt, getLocale, localePrefix, useTranslations } from "@i18n";
+import { getLocale, useTranslations } from "@i18n";
+import BrandMark from "@components/svg/BrandMark.astro";
 
 type Props = {
   /**
-   * Faux quand la page porte deja sa propre bande d'inscription (l'accueil).
-   * Le pied de page lui cede alors le formulaire ET l'ancre #newsletter :
-   * deux formulaires identiques a deux ecrans d'ecart ne doublent pas les
-   * inscriptions, ils donnent l'impression d'une page recopiee.
-   */
+  * Enables the newsletter signup section when explicitly requested.
+  * Newsletter is disabled by default.
+  */
   newsletter?: boolean;
 };
 
-const { newsletter = true }: Props = Astro.props;
+const { newsletter = false }: Props = Astro.props;
 
 const locale = getLocale(Astro);
 const t = useTranslations(locale);
@@ -40,15 +38,6 @@ const year = new Date().getFullYear();
 // Rangee d'icones : uniquement le set maison, et chaque lien porte un nom
 // accessible, parce qu'une icone seule n'en a aucun.
 const social: { label: string; href: string; icon: IconName }[] = [
-  ...(siteData.author.twitter
-    ? [
-        {
-          label: fmt(t.footer.followOn, { name: siteData.author.name, network: "X" }),
-          href: `https://x.com/${siteData.author.twitter}`,
-          icon: "arrow-up-right" as IconName,
-        },
-      ]
-    : []),
   { label: t.footer.emailStudio, href: `mailto:${siteData.author.email}`, icon: "mail" },
   { label: t.footer.subscribeRss, href: routes.rss, icon: "rss" },
 ];
@@ -63,21 +52,6 @@ const before = at >= 0 ? title.slice(0, at) : title;
 const word = at >= 0 ? title.slice(at, at + accent.length) : "";
 const after = at >= 0 ? title.slice(at + accent.length) : "";
 
-const creditHref = siteData.author.twitter
-  ? `https://x.com/${siteData.author.twitter}`
-  : `mailto:${siteData.author.email}`;
-
-// --- Ligne de demonstration ------------------------------------------------
-// Elle n'existe que si siteData.demoNotice est renseigne : l'utilisateur vide ce
-// champ et la ligne disparait. Le champ porte la cle i18n a afficher, et
-// toute autre valeur est prise telle quelle, pour qui prefere sa propre
-// phrase. Le texte lui-meme vit dans les dictionnaires, jamais ici.
-const noticeKey = siteData.demoNotice?.trim() ?? "";
-const demoNotice = noticeKey === "demo.notice" ? t.demo.notice : noticeKey;
-const [noticeBefore = "", noticeAfter = ""] = demoNotice.split("{studio}");
-// La boutique du theme, avec le prefixe de la langue courante : /fr/ en
-// francais, la racine en anglais. Jamais de domaine ecrit deux fois.
-const studioHref = `https://alohapixel.app${localePrefix(locale)}/`;
 
 const columnLink =
   "text-muted-foreground hover:text-foreground inline-flex min-h-11 items-center text-[0.95rem] transition-colors duration-150";
@@ -96,9 +70,17 @@ const columnLink =
           remplir. La description garde sa longueur de ligne confortable par
           measure-prose, ce qui protege la lecture sans figer la colonne. */}
       <div class="flex flex-col gap-6 lg:col-span-4">
-        <a href={routes.home} class="flex min-h-11 items-center gap-2" aria-label={t.nav.brandHome}>
-          <Icon name="wave" size={22} class="text-primary" />
-          <span class="font-display text-xl font-semibold tracking-tight">{siteData.name}</span>
+        <a href={routes.home} class="flex min-h-11 items-center gap-3" aria-label={t.nav.brandHome}>
+          <BrandMark size={30} class="shrink-0 text-primary" />
+
+          <span class="flex flex-col leading-none">
+            <span class="font-display text-xl font-semibold tracking-tight">
+              {siteData.name}
+            </span>
+            <span class="mt-1 text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-ink/60">
+              Cloud Security
+            </span>
+          </span>
         </a>
         <p class="text-muted-foreground measure-prose text-[0.95rem] leading-relaxed">
           {t.footer.tagline}
@@ -181,53 +163,58 @@ const columnLink =
     >
       <div class="text-muted-foreground flex flex-col gap-1 text-sm">
         <p>&copy; {year} {siteData.name}. {t.footer.rights}</p>
-        <p>{t.footer.builtWith}</p>
-        <p>
-          {t.footer.themeBy}{" "}
-          <a href={creditHref} class="text-foreground font-semibold hover:underline">
-            {siteData.author.name}
-          </a>
-        </p>
-        {
-          demoNotice && (
-            <p>
-              {noticeBefore}
-              <a href={studioHref} class="text-foreground font-semibold hover:underline">
-                {t.demo.studio}
-              </a>
-              {noticeAfter}
-            </p>
-          )
-        }
+        
       </div>
 
-      <ul class="flex flex-wrap items-center gap-2">
-        <li class="mr-1">
-          <LocaleSwitcher variant="inline" />
-        </li>
-        {
-          social.map((item) => (
-            <li>
-              <a
-                href={item.href}
-                aria-label={item.label}
-                class="border-border text-muted-foreground hover:bg-muted hover:text-foreground rounded-pill grid size-11 place-items-center border transition-colors duration-150"
-              >
-                <Icon name={item.icon} size={17} />
-              </a>
-            </li>
-          ))
-        }
-        <li>
-          <a
-            href="#content"
-            class="border-border text-muted-foreground hover:bg-muted hover:text-foreground rounded-pill inline-flex min-h-11 items-center gap-2 border px-4 text-sm transition-colors duration-150"
-          >
-            <Icon name="chevron-up" size={16} />
-            {t.footer.backToTop}
-          </a>
-        </li>
-      </ul>
+     <ul class="flex flex-wrap items-center gap-2">
+  <li>
+    <a
+      href={siteData.author.linkedin}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="border-border text-muted-foreground hover:bg-muted hover:text-foreground rounded-pill inline-flex min-h-11 items-center gap-2 border px-4 text-sm transition-colors duration-150"
+    >
+      LinkedIn
+      <Icon name="arrow-up-right" size={15} />
+    </a>
+  </li>
+
+  <li>
+    <a
+      href={siteData.author.github}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="border-border text-muted-foreground hover:bg-muted hover:text-foreground rounded-pill inline-flex min-h-11 items-center gap-2 border px-4 text-sm transition-colors duration-150"
+    >
+      GitHub
+      <Icon name="arrow-up-right" size={15} />
+    </a>
+  </li>
+
+  {
+    social.map((item) => (
+      <li>
+        <a
+          href={item.href}
+          aria-label={item.label}
+          class="border-border text-muted-foreground hover:bg-muted hover:text-foreground rounded-pill grid size-11 place-items-center border transition-colors duration-150"
+        >
+          <Icon name={item.icon} size={17} />
+        </a>
+      </li>
+    ))
+  }
+
+  <li>
+    <a
+      href="#content"
+      class="border-border text-muted-foreground hover:bg-muted hover:text-foreground rounded-pill inline-flex min-h-11 items-center gap-2 border px-4 text-sm transition-colors duration-150"
+    >
+      <Icon name="chevron-up" size={16} />
+      {t.footer.backToTop}
+    </a>
+  </li>
+</ul> 
     </div>
   </div>
 </footer>

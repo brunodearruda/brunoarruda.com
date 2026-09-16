@@ -40,10 +40,10 @@ export const enReading = {
     navLabel: "Post navigation",
     keepReading: "Keep reading",
     keepReadingAccent: "reading",
-    keepReadingLede: "Three more notes from the same notebook, picked by topic and not by an algorithm.",
+    keepReadingLede: "More practical articles related to this topic.",
     keepReadingCta: "All posts",
     aboutAuthor: "About the author",
-    moreFromAuthor: "More from {name}",
+    moreFromAuthor: "About {name}",
     backToPosts: "Back to all posts",
     /** Credit optionnel sous l'image de couverture. */
     coverCredit: "Cover: {credit}",
@@ -55,29 +55,38 @@ export const enReading = {
 
   // --- Archives et listes --------------------------------------------------
   archive: {
-    metaTitle: "All posts",
-    metaDescription:
-      "Every post published on Reef Notes, newest first: build logs, performance work, typography, and the business of a small studio.",
-    eyebrow: "Archive",
-    title: "Everything we have written",
-    accent: "Everything",
-    lede:
-      "The full archive, newest first. Thirty seconds of scrolling beats a search box when you do not yet know what you are looking for.",
-    /** Suffixe de titre des pages 2 et suivantes. */
-    pageSuffix: "page {n}",
-    /** Libelle accessible de la grille : elle n'a pas de titre visible propre. */
-    listLabel: "Post list",
-    paginationLabel: "Post pagination",
-    topicTitle: "Posts filed under {topic}",
-    authorTitle: "Posts by {name}",
-    tagTitle: "Posts tagged {tag}",
-    countLabel: "{count} posts",
-    countOne: "1 post",
-    emptyTitle: "Nothing here yet",
-    emptyLede:
-      "No post matches this page. The archive fills up every couple of weeks, and the RSS feed will tell you when it does.",
-    emptyCta: "Back to all posts",
-  },
+  metaTitle: "AWS Cloud Security Blog | Bruno Arruda",
+  metaDescription:
+    "Practical articles on AWS cloud security, secure architecture, infrastructure, and lessons learned through hands-on implementation.",
+
+  eyebrow: "BLOG",
+  breadcrumb: "Blog",
+
+  title: "Cloud security, from architecture to implementation",
+  accent: "implementation",
+
+  lede:
+    "Practical articles exploring AWS cloud security, architecture decisions, technical implementations, and the lessons behind the work.",
+
+  /** Suffix for pages 2 and later. */
+  pageSuffix: "page {n}",
+
+  /** Accessible label for the post grid. */
+  listLabel: "Article list",
+  paginationLabel: "Article pagination",
+
+  topicTitle: "Articles about {topic}",
+  tagTitle: "Articles tagged {tag}",
+
+  countLabel: "{count} articles",
+  countOne: "1 article",
+
+  emptyTitle: "The first articles are on the way",
+  emptyLede:
+    "I’m currently building and documenting the first AWS cloud security labs and technical articles for this site.",
+
+  emptyCta: "Explore topics",
+},
 
   // --- Newsletter ----------------------------------------------------------
   // Le bloc vit dans le pied de page et en fin d'article. Il n'appelle aucun

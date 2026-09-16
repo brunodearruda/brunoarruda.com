@@ -13,14 +13,14 @@ export const enChrome = {
   // Quatre rubriques, pas de mega-menu : un blog qui ouvre un panneau au survol
   // demande au lecteur de choisir avant de lui avoir donne une raison de choisir.
   nav: {
-    posts: "Posts",
+    posts: "Blog",
     topics: "Topics",
+    labs: "Labs",
     about: "About",
     contact: "Contact",
-    authors: "Authors",
     search: "Search",
     /** Libelle accessible du lien qui ramene le titre du blog a l'accueil. */
-    brandHome: "Reef Notes, back to the home page",
+    brandHome: "Bruno Arruda, back to the home page",
     /** Les deux <nav> de la page portent un nom : sans lui, un lecteur d'ecran
      *  annonce "navigation" deux fois et ne dit pas laquelle des deux. */
     mainLabel: "Main",
@@ -37,9 +37,9 @@ export const enChrome = {
   // qui aligne six colonnes copie un SaaS et sert d'egout a liens morts.
   footer: {
     tagline:
-      "Reef Notes is the working notebook of a three-person web studio. Build logs, load times, type specimens, and the parts of freelancing nobody puts on a landing page.",
-    colRead: "Read",
-    colStudio: "The studio",
+      "Practical AWS cloud security labs, architecture decisions, and technical notes from an infrastructure and security professional.",
+    colExplore: "Explore",
+    colConnect: "Connect",
     colLegal: "Legal",
     rss: "RSS feed",
     sitemap: "Sitemap",
@@ -48,14 +48,11 @@ export const enChrome = {
     /** src/config/legalData.json.ts porte encore ce document : il garde donc un
      *  libelle et une route, meme si le pied de page n'affiche que les deux
      *  precedents. */
-    terms: "Terms",
     rights: "All rights reserved.",
-    builtWith: "Built with Astro, set in Space Grotesk and Instrument Sans.",
-    themeBy: "Reef theme by",
     backToTop: "Back to top",
     /** Libelles accessibles des liens qui ne portent qu'une icone. */
     subscribeRss: "Subscribe to the RSS feed",
-    emailStudio: "Email the studio",
+    emailStudio: "Email Bruno",
     followOn: "Follow {name} on {network}",
   },
 

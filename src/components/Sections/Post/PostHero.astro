@@ -51,7 +51,7 @@ const readingLabel = minutes === 1 ? t.post.minReadOne : fmt(t.post.minRead, { n
 
 const { title, description, pubDate, updatedDate, cover, coverAlt, draft } = post.data;
 const topicHref = `${routes.topics}${entrySlug(topic.id)}/`;
-const authorHref = `${routes.authors}${entrySlug(author.id)}/`;
+const authorHref = routes.about;
 
 // datetime porte la date complete pour les machines ; le texte visible passe
 // par Intl et suit les usages de la langue affichee.

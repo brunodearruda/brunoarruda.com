@@ -1,0 +1,126 @@
+---
+// src/pages/[...locale]/labs/[id].astro - technical lab detail page with architecture, implementation, validation, and security decisions.
+
+import Footer from "@components/Sections/Global/Footer.astro";
+import Navbar from "@components/Sections/Global/Navbar.astro";
+import LabHero from "@components/Sections/Labs/LabHero.astro";
+import PostBody from "@components/Sections/Post/PostBody.astro";
+import ReadingProgress from "@components/Sections/Post/ReadingProgress.astro";
+import TableOfContents from "@components/Sections/Post/TableOfContents.astro";
+import { getSiteRoutes } from "@config/navData.json.ts";
+import siteData from "@config/siteData.json";
+import { defaultLocale, getLocale, localizePath, useTranslations } from "@i18n";
+import { entryLocale, entrySlug } from "@i18n/content";
+import { article, breadcrumbList } from "@js/schema";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { getCollection, getEntry, render, type CollectionEntry } from "astro:content";
+
+export async function getStaticPaths() {
+  // Draft labs still receive their real local page for review, but remain
+  // excluded from public listings and are marked noindex.
+  const labs = await getCollection("labs");
+
+  return Promise.all(
+    labs.map(async (lab) => {
+      const author = await getEntry(lab.data.author);
+      if (!author) {
+        throw new Error(`Unknown author "${lab.data.author.id}" in "${lab.id}"`);
+      }
+
+      const topic = await getEntry(lab.data.topic);
+      if (!topic) {
+        throw new Error(`Unknown topic "${lab.data.topic.id}" in "${lab.id}"`);
+      }
+
+      const locale = entryLocale(lab.id);
+
+      return {
+        params: {
+          locale: locale === defaultLocale ? undefined : locale,
+          id: entrySlug(lab.id),
+        },
+        props: { lab, author, topic },
+      };
+    }),
+  );
+}
+
+type Props = {
+  lab: CollectionEntry<"labs">;
+  author: CollectionEntry<"authors">;
+  topic: CollectionEntry<"topics">;
+};
+
+const { lab, author, topic } = Astro.props;
+const { Content, headings } = await render(lab);
+
+const locale = getLocale(Astro);
+const t = useTranslations(locale);
+const routes = getSiteRoutes(locale);
+
+const base = Astro.site ?? Astro.url;
+const url = new URL(`${routes.labs}${entrySlug(lab.id)}/`, base).href;
+
+const cover = lab.data.cover;
+const share = cover
+  ? { src: cover.src, alt: lab.data.coverAlt ?? lab.data.title }
+  : siteData.defaultImage;
+
+const articleSchema = article({
+  title: lab.data.title,
+  description: lab.data.description,
+  url,
+  datePublished: lab.data.pubDate,
+  dateModified: lab.data.updatedDate,
+  image: new URL(share.src, base).href,
+  authorName: author.data.name,
+  authorUrl: new URL(routes.about, base).href,
+  publisherName: siteData.name,
+});
+
+const crumbSchema = breadcrumbList([
+  { name: t.common.home, url: new URL(localizePath("/", locale), base).href },
+  { name: "Labs", url: new URL(routes.labs, base).href },
+  { name: lab.data.title, url },
+]);
+---
+
+<BaseLayout
+  title={lab.data.title}
+  description={lab.data.description}
+  type="article"
+  noindex={lab.data.draft}
+  image={share}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(articleSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(crumbSchema)} />
+  </Fragment>
+
+  <ReadingProgress />
+  <Navbar />
+
+  <main id="content" tabindex="-1">
+    <article>
+      <LabHero {lab} {author} {topic} />
+
+      <PostBody>
+        <TableOfContents slot="toc" {headings} />
+        <Content />
+      </PostBody>
+
+      <div class="container-page pb-16 md:pb-24">
+        <div class="measure-prose mx-auto border-t border-border pt-8">
+          <a
+            href={routes.labs}
+            class="text-foreground decoration-primary/50 font-sans text-sm font-semibold underline-offset-4 hover:underline"
+          >
+            ← Back to Labs
+          </a>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <Footer />
+</BaseLayout>

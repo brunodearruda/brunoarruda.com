@@ -41,6 +41,42 @@ const posts = defineCollection({
     }),
 });
 
+// Technical labs and hands-on cloud security projects.
+// Labs are separate from articles because they represent practical work:
+// architecture, implementation, validation, and security decisions.
+const labs = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/data/labs" }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      description: z.string(),
+
+      pubDate: z.coerce.date(),
+      updatedDate: z.coerce.date().optional(),
+
+      author: reference("authors"),
+      topic: reference("topics"),
+
+      tags: z.array(z.string()).default([]),
+
+      // AWS services directly involved in the lab.
+      awsServices: z.array(z.string()).default([]),
+
+      // Security principles or controls demonstrated by the lab.
+      securityControls: z.array(z.string()).default([]),
+
+      cover: image().optional(),
+      coverAlt: z.string().optional(),
+
+      // External evidence / demonstrations.
+      github: z.url().optional(),
+      video: z.url().optional(),
+
+      featured: z.boolean().default(false),
+      draft: z.boolean().default(false),
+    }),
+});
+
 // Les auteurs : un JSON par personne, reference par les articles.
 const authors = defineCollection({
   loader: glob({ pattern: "**/*.json", base: "./src/data/authors" }),
@@ -72,4 +108,4 @@ const topics = defineCollection({
   }),
 });
 
-export const collections = { posts, authors, topics };
+export const collections = { posts, labs, authors, topics };

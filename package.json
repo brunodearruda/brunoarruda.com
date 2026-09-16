@@ -1,26 +1,25 @@
 {
-  "name": "reef",
+  "name": "brunoarruda-com",
   "type": "module",
-  "version": "1.7.1",
-  "description": "Reef, a free bilingual Astro 7 blog theme by Aloha Pixel. Reading-first typography, MDX collections, art-directed light and dark modes, owned SEO, Capacitor-ready.",
+  "version": "1.0.0",
+  "description": "Personal website, technical blog, and hands-on labs focused on AWS cloud security, secure architecture, and infrastructure.",
   "license": "MIT",
-  "author": "Aloha Pixel (https://alohapixel.app)",
-  "homepage": "https://reef.alohapixel.app",
+  "author": "Bruno Arruda",
+  "homepage": "https://brunoarruda.com",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/alohapixelcom-hash/reef.git"
+    "url": "git+https://github.com/brunodearruda/brunoarruda.com.git"
   },
   "bugs": {
-    "url": "https://github.com/alohapixelcom-hash/reef/issues"
+    "url": "https://github.com/brunodearruda/brunoarruda.com/issues"
   },
   "keywords": [
+    "aws",
+    "cloud-security",
+    "cybersecurity",
+    "cloud-infrastructure",
     "astro",
-    "astro-theme",
-    "blog-theme",
-    "tailwindcss",
-    "mdx",
-    "i18n",
-    "capacitor"
+    "mdx"
   ],
   "packageManager": "pnpm@11.22.0",
   "engines": {
@@ -28,11 +27,9 @@
   },
   "scripts": {
     "app": "astro build && node scripts/app.mjs",
-    "build": "node scripts/covers.mjs && node scripts/favicon.mjs && astro build",
+    "build": "node scripts/favicon.mjs && astro build",
     "check": "astro check",
-    "covers": "node scripts/covers.mjs",
     "dev": "astro dev",
-    "predev": "node scripts/covers.mjs",
     "lint:house": "node scripts/house.mjs",
     "og": "node scripts/og.mjs",
     "poster": "node scripts/poster.mjs",

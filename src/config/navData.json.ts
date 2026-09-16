@@ -10,7 +10,7 @@ import { localizePath, useTranslations, type Locale } from "@i18n";
 import type { FooterColumn, NavItem, SiteRoutes } from "./types/configDataTypes";
 
 /**
- * Nav principale : quatre rubriques a plat, aucun enfant.
+ * Nav principale : cinq rubriques a plat, aucun enfant.
  *
  * Un blog n'a pas de mega-menu. Le lecteur arrive par un article partage, pas
  * par la page d'accueil : la barre doit lui dire ou il a atterri et lui offrir
@@ -21,6 +21,7 @@ export function getNavData(locale: Locale): NavItem[] {
   const L = (path: string): string => localizePath(path, locale);
   return [
     { text: t.nav.posts, href: L("/blog/") },
+    { text: t.nav.labs, href: L("/labs/") },
     { text: t.nav.topics, href: L("/topics/") },
     { text: t.nav.about, href: L("/about/") },
     { text: t.nav.contact, href: L("/contact/") },
@@ -39,18 +40,16 @@ export function getFooterData(locale: Locale): FooterColumn[] {
   const L = (path: string): string => localizePath(path, locale);
   return [
     {
-      title: t.footer.colRead,
+      title: t.footer.colExplore,
       links: [
         { text: t.nav.posts, href: L("/blog/") },
+        { text: t.nav.labs, href: L("/labs/") },
         { text: t.nav.topics, href: L("/topics/") },
-        { text: t.nav.authors, href: L("/authors/") },
-        // Un flux par langue : un lecteur francophone abonne au flux anglais
-        // recevrait des titres qu'il ne lira pas.
         { text: t.footer.rss, href: L("/rss.xml") },
       ],
     },
     {
-      title: t.footer.colStudio,
+      title: t.footer.colConnect,
       links: [
         { text: t.nav.about, href: L("/about/") },
         { text: t.nav.contact, href: L("/contact/") },
@@ -79,8 +78,8 @@ export function getSiteRoutes(locale: Locale): SiteRoutes {
   return {
     home: L("/"),
     posts: L("/blog/"),
+    labs: L("/labs/"),
     topics: L("/topics/"),
-    authors: L("/authors/"),
     about: L("/about/"),
     contact: L("/contact/"),
     search: L("/search/"),
@@ -90,6 +89,5 @@ export function getSiteRoutes(locale: Locale): SiteRoutes {
     sitemap: "/sitemap-index.xml",
     imprint: L("/legal/"),
     privacy: L("/privacy/"),
-    terms: L("/terms/"),
   };
 }

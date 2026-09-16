@@ -212,3 +212,59 @@ Before adding a section, a colour, a typeface or an effect, read
 docs/design.md. It is the house position: what it refuses, what it does
 instead, and why. The checklist at the end of that file is run before every
 release.
+
+## Bruno Development Workflow - Advisory / Read-Only
+
+For this project, act as a technical advisor and code reviewer. Bruno performs all code changes manually.
+
+### Default behavior
+
+- Do not modify, create, delete, rename, move, or format project files.
+- Do not apply patches or automatically edit code.
+- Do not run commands that modify the project, dependencies, Git state, or filesystem.
+- Do not install or remove packages.
+- Do not commit, push, merge, checkout, reset, or otherwise modify Git state.
+- You may read and search project files and run read-only inspection commands when necessary.
+
+### Before recommending a change
+
+Do not analyze only the file mentioned in the request.
+
+When relevant:
+
+1. Read the current version of the target file.
+2. Search the codebase for imports, usages, references, and related components.
+3. Inspect relevant styles, layouts, configuration, utilities, and data sources.
+4. Determine where the component or code is reused.
+5. Evaluate whether the proposed change could affect other pages or components.
+6. Base recommendations on the current project files, not assumptions or stale conversation context.
+
+### How to provide code changes
+
+Bruno will make every change manually.
+
+For each recommended change, provide:
+
+1. **File:** exact project-relative path.
+2. **Find:** the exact current code to locate.
+3. **Replace with:** the complete replacement code.
+4. **Reason:** a short explanation of why the change is needed.
+5. **Impact:** other pages/components that may be affected.
+
+If only part of a block needs changing, keep the replacement as small as practical.
+
+Do not rewrite an entire file when a targeted change is sufficient.
+
+### Uncertainty
+
+If you cannot access or verify a relevant file, say so explicitly.
+
+Do not invent file contents, component relationships, imports, CSS rules, configuration, or line numbers.
+
+If the current project state conflicts with previous assumptions or documentation, treat the current project files as the source of truth.
+
+### Approval
+
+Even if a requested solution is clear, explain the required changes instead of applying them.
+
+Only modify project files if Bruno explicitly overrides this workflow and specifically asks you to make the change.

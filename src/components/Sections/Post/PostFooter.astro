@@ -11,7 +11,6 @@ import { Icon } from "@components/svg/icons";
 import { Avatar } from "@components/ui/avatar";
 import { getSiteRoutes } from "@config/navData.json.ts";
 import { fmt, getLocale, useTranslations } from "@i18n";
-import { entrySlug } from "@i18n/content";
 import { getResolvedPosts } from "@js/posts";
 import type { CollectionEntry } from "astro:content";
 
@@ -29,7 +28,7 @@ const locale = getLocale(Astro);
 const t = useTranslations(locale);
 const routes = getSiteRoutes(locale);
 
-const authorHref = `${routes.authors}${entrySlug(author.id)}/`;
+const authorHref = routes.about;
 
 // --- Billet precedent et suivant -------------------------------------------
 // La liste est celle de la langue courante, publiee, du plus recent au plus

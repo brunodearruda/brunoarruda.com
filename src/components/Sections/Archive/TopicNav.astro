@@ -19,12 +19,15 @@ type Props = {
   locale: Locale;
   /** Le slug du sujet en cours, sans prefixe de langue. Absent sur l'archive complete. */
   activeSlug?: string;
+  /** Destination of the "All" pill. Defaults to the Blog archive. */
+  allHref?: string;
   class?: string;
 };
 
-const { topics, locale, activeSlug, class: className } = Astro.props;
+const { topics, locale, activeSlug, allHref, class: className } = Astro.props;
 const t = useTranslations(locale);
 const routes = getSiteRoutes(locale);
+const allDestination = allHref ?? routes.posts;
 
 const pill = [
   "inline-flex min-h-11 items-center gap-2 rounded-pill border px-4",
@@ -39,7 +42,7 @@ const active = "border-transparent bg-foreground text-background font-medium";
   <ul class="-mx-1 flex flex-nowrap items-center gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible">
     <li>
       <a
-        href={routes.posts}
+        href={allDestination}
         class:list={[pill, activeSlug === undefined ? active : idle]}
         aria-current={activeSlug === undefined ? "page" : undefined}
       >

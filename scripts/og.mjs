@@ -42,11 +42,36 @@ const ACCENT_2 = token("coral-400", "#ff7a59");
 
 // title : ce qui s'affiche en enorme. eyebrow : la petite ligne au-dessus.
 const PAGES = [
-  { slug: "default", eyebrow: "Reef Notes", title: "The notebook, not the portfolio." },
-  { slug: "blog", eyebrow: "Reef Notes · Posts", title: "What we learn while building sites." },
-  { slug: "topics", eyebrow: "Reef Notes · Topics", title: "Every note, sorted by subject." },
-  { slug: "about", eyebrow: "Reef Notes · About", title: "A two-person studio that writes it down." },
-  { slug: "contact", eyebrow: "Reef Notes · Contact", title: "Tell us what you are building." },
+  {
+    slug: "default",
+    eyebrow: "AWS Cloud Security · Secure Architecture",
+    title: "Building secure AWS architectures",
+  },
+  {
+    slug: "blog",
+    eyebrow: "Blog · AWS Cloud Security",
+    title: "Cloud security, from architecture to implementation",
+  },
+  {
+    slug: "labs",
+    eyebrow: "Labs · AWS Cloud Security",
+    title: "Cloud security, built in practice",
+  },
+  {
+    slug: "topics",
+    eyebrow: "Topics · AWS Cloud Securitys",
+    title: "Explore cloud security by topic",
+  },
+  {
+    slug: "about",
+    eyebrow: "About · Bruno Arruda",
+    title: "Infrastructure experience. Cloud security direction.",
+  },
+  {
+    slug: "contact",
+    eyebrow: "Contact · Bruno Arruda",
+    title: "Let's talk cloud, security, and infrastructure.",
+  },
 ];
 
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -68,7 +93,7 @@ function twoLines(title) {
 function svgTemplate({ eyebrow, title }) {
   const lines = twoLines(title);
   const titleSize = lines.length === 2 ? 76 : 84;
-  const firstY = lines.length === 2 ? 330 : 370;
+  const firstY = lines.length === 2 ? 350 : 385;
   const text = lines
     .map((l, i) => `<text x="90" y="${firstY + i * (titleSize + 12)}" font-family="Space Grotesk, Inter Tight, Arial, sans-serif" font-weight="800" font-size="${titleSize}" letter-spacing="-2.5" fill="#ffffff">${esc(l)}</text>`)
     .join("\n  ");
@@ -98,11 +123,62 @@ function svgTemplate({ eyebrow, title }) {
   <rect width="1200" height="630" fill="url(#glowB)"/>
   <rect width="1200" height="630" fill="url(#grid)"/>
 
-  <text x="90" y="180" font-family="Space Grotesk, Inter Tight, Arial, sans-serif" font-weight="700" font-size="30" letter-spacing="6" fill="${ACCENT}">${esc(eyebrow.toUpperCase())}</text>
+    <!-- Architecture Layers -->
+  <g transform="translate(90 105)" fill="${ACCENT}">
+    <path d="M32 0 64 16 32 32 0 16 32 0Z"/>
+    <path d="M32 19 64 35 32 51 0 35 32 19Z" opacity=".78"/>
+    <path d="M32 38 64 54 32 70 0 54 32 38Z" opacity=".56"/>
+  </g>
+
+  <text
+    x="180"
+    y="132"
+    font-family="Space Grotesk, Inter Tight, Arial, sans-serif"
+    font-weight="700"
+    font-size="30"
+    fill="#ffffff"
+  >BRUNO ARRUDA</text>
+
+  <text
+    x="180"
+    y="165"
+    font-family="Space Grotesk, Inter Tight, Arial, sans-serif"
+    font-weight="700"
+    font-size="17"
+    letter-spacing="5"
+    fill="${ACCENT}"
+  >CLOUD SECURITY</text>
+
+  <text
+    x="90"
+    y="245"
+    font-family="Space Grotesk, Inter Tight, Arial, sans-serif"
+    font-weight="700"
+    font-size="20"
+    letter-spacing="4"
+    fill="${DEEP_SOFT}"
+  >${esc(eyebrow.toUpperCase())}</text>
+
   ${text}
 
-  <path d="M 90 520 q 30 -26 60 0 t 60 0 t 60 0 t 60 0" fill="none" stroke="${ACCENT}" stroke-width="7" stroke-linecap="round"/>
-  <text x="1110" y="560" text-anchor="end" font-family="Space Grotesk, Inter Tight, Arial, sans-serif" font-weight="700" font-size="26" fill="${DEEP_SOFT}">reef.alohapixel.app</text>
+  <line
+    x1="90"
+    y1="525"
+    x2="190"
+    y2="525"
+    stroke="${ACCENT}"
+    stroke-width="4"
+  />
+
+  <text
+    x="1110"
+    y="560"
+    text-anchor="end"
+    font-family="Space Grotesk, Inter Tight, Arial, sans-serif"
+    font-weight="700"
+    font-size="26"
+    fill="${DEEP_SOFT}"
+  >brunoarruda.com</text>
 </svg>`;
 }
 

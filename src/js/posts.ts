@@ -22,8 +22,6 @@ export interface ResolvedPost {
   slug: string;
   /** Le slug du sujet, deja debarrasse de son prefixe de langue. */
   topicSlug: string;
-  /** Le slug de l'auteur, deja debarrasse de son prefixe de langue. */
-  authorSlug: string;
   /** Temps de lecture en minutes, calcule sur le corps du billet. */
   minutes: number;
 }
@@ -55,7 +53,6 @@ export async function getResolvedPosts(locale: Locale): Promise<ResolvedPost[]> 
         topic,
         slug: entrySlug(post.id),
         topicSlug: entrySlug(topic.id),
-        authorSlug: entrySlug(author.id),
         minutes: readingTime(post.body ?? "").minutes,
       };
     }),

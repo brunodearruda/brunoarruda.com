@@ -1,0 +1,15 @@
+{
+  "name": "Bruno Arruda",
+  "role": "Cloud Security & Infrastructure Professional",
+  "bio": "Cloud security and infrastructure professional with experience in network security, infrastructure, AWS, Kubernetes, and information security. Based in Ireland, I use this site to document hands-on AWS security labs, architecture decisions, and practical solutions to real-world cloud security challenges.",
+  "links": [
+    {
+      "label": "LinkedIn",
+      "href": "https://www.linkedin.com/in/brunoarruda"
+    },
+    {
+      "label": "GitHub",
+      "href": "https://github.com/brunodearruda"
+    }
+  ]
+}

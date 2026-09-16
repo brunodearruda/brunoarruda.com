@@ -1,0 +1,6 @@
+{
+  "name": "Detection & Response",
+  "description": "Logging, monitoring, threat detection, security visibility, and incident response across AWS environments.",
+  "accent": "coral",
+  "order": 3
+}

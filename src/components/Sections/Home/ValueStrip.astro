@@ -1,0 +1,39 @@
+---
+// src/components/Sections/Home/ValueStrip.astro - four concise pillars below the Home hero.
+import { getLocale, useTranslations } from "@i18n";
+import { Icon } from "@components/svg/icons";
+
+const locale = getLocale(Astro);
+const t = useTranslations(locale);
+const valueIcons = ["cloud", "shield", "file-text", "users"] as const;
+---
+
+<section
+  class="border-border bg-surface border-y"
+  aria-label="What you will find here"
+  data-slot="value-strip"
+>
+  <div class="container-page grid grid-cols-1 divide-y divide-border sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4">
+    {
+      t.home.values.map((item, index) => (
+    <div class="flex items-center gap-4 py-6 sm:px-6 sm:first:pl-0 lg:py-8 lg:not-first:border-l lg:last:pr-0">
+      <div
+        class="grid size-12 shrink-0 place-items-center text-primary"
+        aria-hidden="true"
+      >
+        <Icon name={valueIcons[index]} size={38} />
+      </div>
+
+      <div class="min-w-0">
+        <p class="font-display text-base font-semibold tracking-tight text-ink">
+          {item.title}
+        </p>
+        <p class="mt-1 text-sm text-foreground/60">
+          {item.description}
+        </p>
+      </div>
+    </div>
+  ))
+}
+  </div>
+</section>

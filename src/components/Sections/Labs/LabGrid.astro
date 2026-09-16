@@ -1,0 +1,51 @@
+---
+// src/components/Sections/Labs/LabGrid.astro - grid of published technical labs.
+
+import LabCard from "@components/Cards/LabCard.astro";
+import type { Locale } from "@i18n";
+import type { ResolvedLab } from "@js/labs";
+import EmptyState from "@components/Sections/Archive/EmptyState.astro";
+
+type Props = {
+  labs: ResolvedLab[];
+  locale: Locale;
+  class?: string;
+};
+
+const {
+  labs,
+  locale,
+  class: className,
+}: Props = Astro.props;
+---
+
+<section
+  class:list={["container-page py-14 md:py-20", className]}
+  data-slot="lab-grid"
+>
+  {
+    labs.length === 0 ? (
+      <EmptyState
+        title="The first labs are being built"
+        description="Hands-on AWS cloud security labs will be published here as they are designed, implemented, tested, and documented."
+        icon="code"
+      />
+    ) : (
+      <ul
+        class="grid grid-cols-1 gap-6 md:grid-cols-2"
+        aria-label="Cloud security labs"
+      >
+        {labs.map((entry) => (
+          <li class="flex">
+            <LabCard
+              {entry}
+              {locale}
+              as="h2"
+              class="w-full"
+            />
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</section>

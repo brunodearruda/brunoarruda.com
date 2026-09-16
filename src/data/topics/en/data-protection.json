@@ -1,0 +1,6 @@
+{
+  "name": "Data Protection",
+  "description": "Encryption, secrets, key management, storage security, backup, and controls for protecting data in AWS.",
+  "accent": "reef",
+  "order": 4
+}

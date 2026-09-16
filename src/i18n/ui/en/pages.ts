@@ -3,92 +3,150 @@
 // Une page est un assemblage de sections, jamais un endroit ou l'on ecrit des
 // phrases : les titres de hero, les descriptions meta et les libelles de
 // formulaire vivent ici, et les composants n'affichent que ce qu'on leur passe.
-//
-// Le blog de demonstration s'appelle Reef Notes : le carnet d'un studio web
-// independant. Le registre est celui d'un artisan qui montre son etabli, pas
-// celui d'une page commerciale. Concret, chiffre quand c'est possible, jamais une
-// promesse qu'un billet ne tient pas juste en dessous.
 
 export const enPages = {
   // --- Accueil -------------------------------------------------------------
-  home: {
-    metaTitle: "Reef Notes, a working notebook from an independent web studio",
-    metaDescription:
-      "Build logs, load times, typography and the business of running a small web studio. Written in English and French, a few notes a month, by the three people doing the work.",
-    eyebrow: "Reef Notes",
-    heroTitle: "Notes from a small web studio",
-    heroAccent: "small",
-    heroLede:
-      "What we learn building sites, written down as we go. The notebook, not the portfolio.",
-    heroPrimary: "Start reading",
-    heroSecondary: "About the studio",
-    heroRecent: "Latest notes",
-    // Les trois libelles du compteur du hero, dans l'ordre exact ou la page
-    // fournit les nombres : notes publiees, sujets, langues servies.
-    heroLedger: ["notes published", "threads", "languages"],
-    featuredEyebrow: "Pick of the month",
-    latestTitle: "Latest notes",
-    latestAccent: "Latest",
-    latestLede: "The most recent entries, newest first. Everything older waits in the archive.",
-    latestCta: "Browse all posts",
-    topicsTitle: "Five threads we keep pulling",
-    topicsAccent: "threads",
-    topicsLede:
-      "Every post belongs to exactly one topic, so a thread can be read end to end without wading through the rest.",
-    topicsCta: "See all topics",
-    authorsTitle: "Who writes here",
-    authorsAccent: "writes",
-    authorsLede:
-      "Everyone here still ships client work. Each byline leads to everything that person has published, oldest note included.",
-    authorsCta: "Meet the writers",
-    aboutTitle: "The studio behind the notes",
-    aboutAccent: "studio",
-    aboutLede:
-      "One builds, one measures, one designs, and all three write. Three or four projects a year, and everything we learn on them ends up here.",
-    aboutCta: "How we work",
-  },
+ home: {
+  metaTitle: "Bruno Arruda | AWS Cloud Security",
+
+  metaDescription:
+    "Practical AWS cloud security labs, secure architecture insights, and real-world guidance for building more secure and resilient cloud environments.",
+
+  eyebrow: "SECURE ARCHITECTURE. REAL IMPACT.",
+
+  heroTitle: "Build securely.\nGo further.",
+
+  heroLede:
+    "Practical insights, hands-on labs, and real-world guidance on AWS cloud security, secure architecture and infrastructure.",
+
+  heroPrimary: "Explore the blog",
+
+  heroSecondary: "Browse labs",
+
+  heroSupport: "LEARN · BUILD · DEFEND · IMPROVE",
+
+  values: [
+    {
+      title: "AWS Focus",
+      description: "Real-world cloud security",
+    },
+    {
+      title: "Practical Labs",
+      description: "Hands-on, step by step",
+    },
+    {
+      title: "Technical Writing",
+      description: "Deep dives and guides",
+    },
+    {
+      title: "Security Mindset",
+      description: "Build, defend, improve",
+    },
+  ],
+
+  latestEyebrow: "LATEST INSIGHTS",
+
+  latestTitle: "Latest from the blog",
+
+  latestLede:
+    "Technical articles, tutorials, and insights on cloud security and infrastructure.",
+
+  latestCta: "View all articles",
+
+  labsEyebrow: "HANDS-ON LEARNING",
+
+  labsTitle: "Popular labs",
+
+  labsLede:
+    "Step-by-step labs to build practical skills with AWS security.",
+
+  labsCta: "View all labs",
+
+  topicsEyebrow: "EXPLORE BY TOPIC",
+
+  topicsTitle: "Browse topics",
+
+  topicsLede:
+    "Dive into key areas of cloud security and infrastructure.",
+
+  topicsCta: "View all topics",
+
+  aboutEyebrow: "A MORE SECURE CLOUD",
+
+  aboutTitle: "Practical knowledge.\nStronger systems.",
+
+  aboutLede:
+    "My goal is to make cloud security simpler and more practical, sharing real-world experience, hands-on labs and clear guidance for professionals who want to build and operate more secure systems on AWS.",
+
+  aboutCta: "About me",
+},
 
   // --- A propos ------------------------------------------------------------
   about: {
-    metaTitle: "About the studio",
+    metaTitle: "Bruno Arruda | Cloud Security & Infrastructure",
     metaDescription:
-      "Who runs Reef Notes, how the studio works, what we take on and what we turn down, and why the working notes are published instead of filed away.",
-    eyebrow: "About",
-    title: "A three-person studio that writes things down",
-    accent: "writes",
+      "Infrastructure and security professional building deeper expertise in AWS cloud security through hands-on labs, architecture, and practical implementation.",
+    eyebrow: "ABOUT",
+    breadcrumb: "About",
+    title: "Infrastructure experience. Cloud security direction.",
+    accent: "Cloud security",
     lede:
-      "We design and build websites for small teams. Reef Notes is where the working notes end up, because the useful part of a project is almost never the screenshot.",
-    storyTitle: "How the notebook started",
-    storyAccent: "notebook",
+      "I’m Bruno Arruda, an infrastructure and security professional based in Ireland, building on years of experience in networks, systems, and information security to focus on AWS cloud security.",
+    storyTitle: "Built from infrastructure up",
+    storyAccent: "infrastructure",
     storyParagraphs: [
-      "The studio opened in 2019 with one laptop and a spreadsheet of leads. The first year taught us that a website is rarely a design problem: it is a decision problem with a design attached. Which font loads first, which section gets cut, what happens on a four-year-old Android phone on hotel wifi.",
-      "For three years the answers lived in a private repository. Every time a client asked why a page felt slow, or why we refused to add a fifth typeface, the reasoning was already written down somewhere. Publishing those notes cost us nothing and saved the same explanation twice a month.",
-      "Reef Notes is that repository, cleaned up. Some entries are build logs with numbers in them, some are arguments about type, some cover the unglamorous half of freelancing: scoping, quoting, being paid on time. All of them come out of work we actually did.",
+      "My career in technology was built from the infrastructure layer up. I started working with networks and systems and progressively moved deeper into infrastructure and information security, working across enterprise environments where reliability, availability, and security were part of everyday operations.",
+      "Over the years, my work has included network security, Check Point firewalls, vulnerability management, Windows and Linux environments, virtualization, backup infrastructure, ISO 27001 security controls, and hybrid environments spanning on-premises infrastructure and AWS.",
+      "Later, my work expanded into modern infrastructure, including Docker, Kubernetes, Rancher, CI/CD, and highly available production environments. That experience changed the way I look at security: not as something added after infrastructure is built, but as part of how systems should be designed and operated.",
+      "Today, I’m bringing that background into AWS cloud security. My focus is on developing deeper cloud architecture and security expertise through hands-on labs, real implementations, and continuous study - then documenting what I learn here.",
     ],
-    valuesTitle: "How we work",
+    valuesTitle: "How I approach the work",
     valuesAccent: "work",
-    valuesLede: "Three rules we have not yet found a good reason to break.",
+    valuesLede: "A practical approach to developing cloud security expertise: understand the fundamentals, build the solution, and document what matters.",
     values: [
       {
-        title: "Measure before arguing",
-        text: "Taste settles nothing about performance. We publish the before and after numbers, including the times a change made things worse.",
+        title: "Learn deeply",
+        text: "Understand the architecture, services, security principles, and trade-offs behind a solution before implementing it.",
       },
       {
-        title: "Ship the boring version",
-        text: "The boring version launches on time, survives a redesign and still works with JavaScript off. Cleverness is what we add once the boring version is live.",
+        title: "Build practically",
+        text: "Turn concepts into hands-on AWS environments, security configurations, architectures, and real-world technical scenarios.",
       },
       {
-        title: "Write it down once",
-        text: "If an answer takes more than five minutes to explain, it becomes a post. Clients get the link, we get our afternoon back.",
+        title: "Document clearly",
+        text: "Capture architecture decisions, implementation steps, findings, and lessons learned so the work can be understood, reviewed, and improved.",
       },
     ],
-    writersTitle: "The three of us",
-    writersAccent: "three",
-    writersLede: "Short bios, honest job titles, and every post each of us has signed.",
-    writersCta: "All authors",
-    contactTitle: "Working together",
+    backgroundTitle: "Professional background",
+backgroundAccent: "background",
+backgroundLede:
+  "Experience built across infrastructure, network security, modern platforms, and cloud environments.",
+
+backgroundAreas: [
+  {
+    title: "Infrastructure & Operations",
+    items: ["Networks", "Windows & Linux", "VMware", "Veeam", "High Availability"],
+  },
+  {
+    title: "Security",
+    items: ["Network Security", "Check Point", "Vulnerability Management", "ISO 27001"],
+  },
+  {
+    title: "Modern Infrastructure",
+    items: ["Docker", "Kubernetes", "Rancher", "CI/CD"],
+  },
+  {
+    title: "Cloud",
+    items: ["AWS", "Hybrid Infrastructure", "Cloud Architecture", "Cloud Security"],
+  },
+],
+
+backgroundYears: "15+ years",
+backgroundYearsLede: "working across technology infrastructure and security.",
+    
+    contactTitle: "Let’s connect",
     contactLede:
-      "We take on three or four projects a year, mostly redesigns for teams of under twenty people. If the timing lines up, tell us what is in the way.",
+      "I’m always interested in connecting with people working in cloud, security, and infrastructure - whether it’s to discuss technical challenges, professional opportunities, or future collaborations.",
     contactCta: "Get in touch",
   },
 
@@ -96,48 +154,46 @@ export const enPages = {
   // Le formulaire est complet et non monte : le theme ne choisit pas de
   // prestataire d'envoi a la place de son utilisateur. La copie, elle, est prete.
   contact: {
-    metaTitle: "Contact",
-    metaDescription:
-      "Project enquiries, a correction on a post, or a question about something we published. One inbox, read by a person, answered within two working days.",
-    eyebrow: "Contact",
-    title: "Write to us, we read all of it",
-    accent: "all",
-    lede:
-      "A project, a correction, a question about a build: it lands in the same inbox and a person answers it. No ticket number, no autoresponder.",
-    formTitle: "Send a message",
-    nameLabel: "Your name",
-    namePlaceholder: "Ada Lovelace",
-    emailLabel: "Email",
-    emailPlaceholder: "you@example.com",
-    subjectLabel: "Subject",
-    subjectPlaceholder: "One line is enough",
-    messageLabel: "Message",
-    messagePlaceholder: "What are you working on, and what is in the way?",
-    submit: "Send message",
-    formNote: "No newsletter signup hidden in this form. Your address is used to reply, and for nothing else.",
-    success: "Message sent. You will hear back within two working days.",
-    error: "That did not go through. Email us directly and we will pick it up there.",
-    directTitle: "Or skip the form",
-    directLede: "Plain email works just as well, and a thread is easier to keep than a form.",
-    directCta: "Email the studio",
-    nextTitle: "What happens next",
-    nextSteps: [
-      "A short reply within two working days, written by one of us.",
-      "If it is a project, three questions come back before any number does.",
-      "If it is a correction, the post is fixed and credited the same week.",
-    ],
-  },
+  metaTitle: "Contact | Bruno Arruda",
+  metaDescription:
+    "Get in touch with Bruno Arruda to discuss cloud security, infrastructure, professional opportunities, or potential collaborations.",
+
+  eyebrow: "CONTACT",
+  breadcrumb: "Contact",
+
+  title: "Let’s talk cloud, security, and infrastructure.",
+  accent: "security",
+
+  lede:
+    "Whether you’d like to discuss a professional opportunity, a technical challenge, or potential collaboration, feel free to get in touch.",
+
+  emailTitle: "Email",
+  emailLede:
+    "The best way to reach me directly for professional enquiries and conversations.",
+  emailCta: "Send an email",
+
+  linkedinTitle: "LinkedIn",
+  linkedinLede:
+    "Connect with me for professional networking, opportunities, and conversations around cloud and security.",
+  linkedinCta: "Connect on LinkedIn",
+
+  githubTitle: "GitHub",
+  githubLede:
+    "Explore my labs, code, technical projects, and the practical work behind this site.",
+  githubCta: "View GitHub",
+},
 
   // --- Sujets --------------------------------------------------------------
   topics: {
-    metaTitle: "Topics",
+    metaTitle: "Cloud Security Topics | Bruno Arruda",
     metaDescription:
-      "Every subject covered on Reef Notes: front-end craft, performance work, typography, and the business of running a small studio.",
-    eyebrow: "Topics",
-    title: "Five threads we keep pulling",
-    accent: "threads",
+      "Explore practical AWS cloud security articles and labs covering identity, network security, detection and response, data protection, and secure architecture.",
+    eyebrow: "TOPICS",
+    breadcrumb: "Topics",
+    title: "Explore cloud security by topic",
+    accent: "cloud security",
     lede:
-      "Every post belongs to exactly one topic. Pick a thread and read it end to end, oldest first if you want the argument in order.",
+      "Browse practical articles and labs organized around the core areas of AWS cloud security, from identity and network protection to detection, data protection, and secure architecture.",
     /** {count} vient du nombre d'articles publies dans le sujet. */
     countLabel: "{count} posts",
     countOne: "1 post",
@@ -147,33 +203,13 @@ export const enPages = {
     emptyLede: "The topic is open and the first post is still a draft. The RSS feed will say when it lands.",
   },
 
-  // --- Auteurs -------------------------------------------------------------
-  authors: {
-    metaTitle: "Authors",
-    metaDescription:
-      "The people who write Reef Notes: what they work on day to day, where to find them elsewhere, and everything they have published here.",
-    eyebrow: "Authors",
-    title: "Who writes here",
-    accent: "writes",
-    lede:
-      "Three people share this notebook. Every post carries a byline, and every byline leads to everything that person has written.",
-    roleLabel: "Role",
-    linksLabel: "Elsewhere",
-    postsBy: "Posts by {name}",
-    readAll: "Read everything by {name}",
-    countLabel: "{count} posts",
-    countOne: "1 post",
-    emptyTitle: "No posts under this byline yet",
-    emptyLede: "An author page with nothing on it means a first draft is open somewhere. It happens.",
-  },
-
   // --- Recherche -----------------------------------------------------------
   // La recherche tourne dans le navigateur sur un index construit au build :
   // zero requete, zero service tiers, et le theme reste 100% statique.
   search: {
     metaTitle: "Search",
     metaDescription:
-      "Search every post on Reef Notes by title, summary, topic or tag. It runs in your browser: nothing is sent to a server and nothing is logged.",
+      "Search technical articles by title, summary, topic, or tag. Search runs locally in your browser without sending queries to a server.",
     eyebrow: "Search",
     title: "Find it again",
     accent: "again",
@@ -209,35 +245,45 @@ export const enPages = {
   },
 
   // --- Mentions legales ----------------------------------------------------
-  // La page /legal/ porte SON propre texte ici, parce qu'elle n'en a pas
-  // ailleurs : src/config/legalData.json.ts ne couvre que la confidentialite et
-  // les conditions. Les passages entre crochets sont a completer par l'utilisateur,
-  // et ce texte ne vaut pas un avis juridique.
   legal: {
-    eyebrow: "Legal",
-    title: "Legal notice",
-    description: "Who publishes this site, who hosts it, and how to reach the publisher.",
-    /** {date} est formatee par formatDate() dans la langue de la page. */
-    lastUpdated: "Last updated on {date}",
-    toc: "On this page",
-    backToTop: "Back to top",
-    sections: [
-      {
-        title: "Publisher",
-        body: "This site is published by [studio name], [legal form] registered at [full address], under number [registration number]. Publication director: [name]. Any question about the content published here can be sent through the contact page.",
-      },
-      {
-        title: "Hosting",
-        body: "The site is a set of static files served by [host name], [host address], reachable at [host contact]. There is no database, no server-side session and no account: nothing is stored on our side when you read a page.",
-      },
-      {
-        title: "Content and reuse",
-        body: "The posts, illustrations and code samples published here belong to their authors. Quoting a passage with a link back is welcome and needs no permission. Republishing a whole post, translated or not, does.",
-      },
-      {
-        title: "Reporting a problem",
-        body: "A factual error, a broken link, a copyright concern: write to the address on the contact page. Corrections are made within two working days and the post carries the date of its revision.",
-      },
-    ],
-  },
+  eyebrow: "LEGAL",
+  title: "Legal notice",
+  description:
+    "Information about the publication, operation, and use of brunoarruda.com.",
+  lastUpdated: "Last updated on {date}",
+  toc: "On this page",
+  backToTop: "Back to top",
+  sections: [
+    {
+      title: "Publisher",
+      body:
+        "brunoarruda.com is a personal professional website published and maintained by Bruno Arruda, based in Ireland. For enquiries related to this website, please use the contact information available on the Contact page.",
+    },
+    {
+      title: "Purpose of this website",
+      body:
+        "This website publishes professional information, technical articles, hands-on labs, and educational content related to cloud computing, infrastructure, and information security. The content is provided for informational and educational purposes.",
+    },
+    {
+      title: "Hosting",
+      body:
+        "This website is delivered using cloud infrastructure. Technical hosting and delivery providers may change as the website evolves. Information about the processing of technical data is available in the Privacy Policy.",
+    },
+    {
+      title: "Copyright and reuse",
+      body:
+        "Unless otherwise stated, original articles, written content, diagrams, and other original material published on this website are © Bruno Arruda. Brief quotations with appropriate attribution and a link to the original page are welcome. Code and projects linked through GitHub may be subject to separate licences specified in their respective repositories.",
+    },
+    {
+      title: "External resources",
+      body:
+        "This website may link to third-party websites, documentation, repositories, and services. These external resources are provided for reference and convenience, and their content and availability are outside the control of this website.",
+    },
+    {
+      title: "Reporting a problem",
+      body:
+        "If you identify a factual error, broken link, copyright concern, or other issue with content published on this website, please get in touch using the Contact page.",
+    },
+  ],
+},
 } as const;

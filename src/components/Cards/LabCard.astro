@@ -1,0 +1,144 @@
+---
+// src/components/Cards/LabCard.astro
+// Portfolio card for a hands-on cloud security lab.
+
+import { Icon } from "@components/svg/icons";
+import { getSiteRoutes } from "@config/navData.json.ts";
+import type { Locale } from "@i18n";
+import type { ResolvedLab } from "@js/labs";
+import { topicTone } from "./topicTone";
+
+type Props = {
+  entry: ResolvedLab;
+  locale: Locale;
+  as?: "h2" | "h3";
+  class?: string;
+};
+
+const {
+  entry,
+  locale,
+  as: Tag = "h3",
+  class: className,
+}: Props = Astro.props;
+
+const { lab, topic, slug, topicSlug } = entry;
+
+const routes = getSiteRoutes(locale);
+
+const href = `${routes.labs}${slug}/`;
+const topicHref = `${routes.topics}${topicSlug}/`;
+
+const tone = topicTone[topic.data.accent];
+---
+
+<article
+  class:list={[
+    "group border-border bg-card rounded-card relative flex flex-col overflow-hidden border",
+    "transition-[border-color,transform,box-shadow] duration-300",
+    "hover:shadow-float hover:border-foreground/20 hover:-translate-y-0.5",
+    className,
+  ]}
+  data-slot="lab-card"
+>
+  <span
+    class:list={["h-[3px] w-full shrink-0", tone.rule]}
+    aria-hidden="true"
+  ></span>
+
+  <div class="flex flex-1 flex-col gap-4 p-6">
+    <p>
+      <a
+        href={topicHref}
+        class:list={[
+          "font-sans rounded-pill relative z-10 px-2.5 py-1 text-xs font-medium",
+          tone.chip,
+        ]}
+      >
+        {topic.data.name}
+      </a>
+    </p>
+
+    <Tag
+      class="font-display text-foreground text-xl leading-snug font-semibold text-balance"
+    >
+      <a
+        href={href}
+        class="after:absolute after:inset-0 after:content-['']"
+      >
+        {lab.data.title}
+      </a>
+    </Tag>
+
+    <p class="text-muted-foreground line-clamp-3 text-[0.95rem] leading-relaxed">
+      {lab.data.description}
+    </p>
+
+    {
+      lab.data.awsServices.length > 0 && (
+        <div class="space-y-2">
+          <p class="text-muted-foreground font-sans text-[0.68rem] font-semibold tracking-[0.14em] uppercase">
+            AWS
+          </p>
+
+          <p class="text-foreground/80 font-sans text-sm">
+            {lab.data.awsServices.join(" · ")}
+          </p>
+        </div>
+      )
+    }
+
+    {
+      lab.data.securityControls.length > 0 && (
+        <div class="space-y-2">
+          <p class="text-muted-foreground font-sans text-[0.68rem] font-semibold tracking-[0.14em] uppercase">
+            Security
+          </p>
+
+          <p class="text-foreground/80 font-sans text-sm">
+            {lab.data.securityControls.join(" · ")}
+          </p>
+        </div>
+      )
+    }
+
+    <div class="border-border mt-auto border-t pt-4">
+      <p class="text-muted-foreground mb-4 flex flex-wrap gap-x-3 gap-y-1 font-sans text-xs">
+        <span>Architecture</span>
+        <span aria-hidden="true">·</span>
+        <span>Implementation</span>
+        <span aria-hidden="true">·</span>
+        <span>Validation</span>
+      </p>
+
+      <div class="flex items-center gap-4">
+        <span
+          class="text-muted-foreground group-hover:text-foreground flex items-center gap-2 text-sm font-semibold transition-colors duration-200"
+        >
+          View lab
+
+          <span
+            class="transition-transform duration-200 group-hover:translate-x-0.5"
+            aria-hidden="true"
+          >
+            <Icon name="arrow-right" size={18} />
+          </span>
+        </span>
+
+        {
+          lab.data.github && (
+            <a
+              href={lab.data.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-muted-foreground hover:text-foreground relative z-10 ml-auto flex items-center gap-1.5 text-sm font-semibold transition-colors duration-200"
+            >
+              GitHub
+              <Icon name="arrow-up-right" size={16} />
+            </a>
+          )
+        }
+      </div>
+    </div>
+  </div>
+</article>

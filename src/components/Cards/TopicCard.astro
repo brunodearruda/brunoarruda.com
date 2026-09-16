@@ -55,8 +55,8 @@ export { topicTone };
 type Props = {
   topic: CollectionEntry<"topics">;
   href: string;
-  /** Nombre de billets publies dans ce sujet, deja compte par la page. */
-  count: number;
+  /** Optional published-article count. Archives can show it; Home can omit it. */
+  count?: number;
   locale: Locale;
   /** Niveau de titre reel, selon ce qui precede la grille dans la page. */
   as?: "h2" | "h3";
@@ -66,7 +66,12 @@ type Props = {
 const { topic, href, count, locale, as: Tag = "h3", class: className }: Props = Astro.props;
 const t = useTranslations(locale);
 const tone = topicTone[topic.data.accent];
-const countLabel = count === 1 ? t.topics.countOne : fmt(t.topics.countLabel, { count });
+const countLabel =
+  count === undefined
+    ? undefined
+    : count === 1
+      ? t.topics.countOne
+      : fmt(t.topics.countLabel, { count });
 ---
 
 <article
@@ -87,12 +92,13 @@ const countLabel = count === 1 ? t.topics.countOne : fmt(t.topics.countLabel, { 
   <span class:list={["h-[3px] w-full shrink-0", tone.rule]} aria-hidden="true"></span>
 
   <div class="flex flex-1 flex-col gap-3 p-7">
-    {/* Le compte en sur-titre. Il etait en bas, dans une pastille teintee ;
-        il monte au-dessus du nom, ou il sert a quelque chose : il dit la
-        taille du sujet avant qu'on decide de l'ouvrir. */}
-    <p class:list={["text-xs font-semibold tracking-[0.14em] uppercase", tone.ghost]}>
-      {countLabel}
-    </p>
+    {
+      countLabel && (
+        <p class:list={["text-xs font-semibold tracking-[0.14em] uppercase", tone.ghost]}>
+           {countLabel}
+        </p>
+      )
+    }
 
     <Tag class="font-display text-foreground text-2xl leading-tight font-bold tracking-tight">
       {/* Le lien couvre toute la carte via ::after : un seul arret de tabulation,

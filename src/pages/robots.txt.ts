@@ -1,4 +1,4 @@
-// src/pages/robots.txt.ts - robots.txt dynamique : tout est autorise sauf la recherche interne, sitemap en URL absolue.
+// src/pages/robots.txt.ts - robots.txt dynamique : exploration autorisee, sitemap en URL absolue.
 import type { APIRoute } from "astro";
 
 export const GET: APIRoute = ({ site, url }) => {
@@ -7,14 +7,9 @@ export const GET: APIRoute = ({ site, url }) => {
   const base = site ?? url;
   const sitemap = new URL("/sitemap-index.xml", base).href;
 
-  // La recherche est interdite aux robots pour la meme raison qu'elle est en
-  // noindex : elle ne produit aucune page qui leur soit utile, et laisser
-  // explorer des URLs a parametres dilue le site dans son propre bruit.
   const body = [
     "User-agent: *",
     "Allow: /",
-    "Disallow: /search/",
-    "Disallow: /*/search/",
     "",
     `Sitemap: ${sitemap}`,
     "",

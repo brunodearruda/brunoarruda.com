@@ -10,8 +10,7 @@
 // [data-header][data-shrunk="true"]::after degrade le contenu la ou la barre le
 // recouvre vraiment. Renommer cet attribut casse le fondu de bord.
 import { Icon } from "@components/svg/icons";
-import { Button } from "@components/ui/button";
-import { LocaleSwitcher } from "@components/ui/locale-switcher";
+import BrandMark from "@components/svg/BrandMark.astro";
 import { Sheet, SheetClose, SheetHeader, SheetTitle, SheetTrigger } from "@components/ui/sheet";
 import { ThemeToggle } from "@components/ui/theme-toggle";
 import { getNavData, getSiteRoutes } from "@config/navData.json.ts";
@@ -45,9 +44,6 @@ const navLink = [
   "transition-colors duration-200 hover:bg-current/8",
 ].join(" ");
 
-// L'inscription vit dans le pied de page, present sur toutes les pages : une
-// ancre suffit et ne depend d'aucune langue.
-const subscribeHref = "#newsletter";
 ---
 
 {/* Le lien d'evitement est le premier element focalisable du document. Il ne
@@ -94,8 +90,15 @@ const subscribeHref = "#newsletter";
         aria-label={t.nav.brandHome}
         data-header-brand
       >
-        <Icon name="wave" size={20} class="text-primary" />
-        <span class="font-display text-lg font-semibold tracking-tight">{siteData.name}</span>
+      <BrandMark size={28} class="shrink-0 text-primary" />
+      <span class="flex flex-col leading-none">
+        <span class="font-display text-lg font-semibold tracking-tight">
+          {siteData.name}
+        </span>
+        <span class="mt-1 text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-current/70">
+        Cloud Security
+        </span>
+      </span>
       </a>
 
       <ul class="mx-auto hidden items-center gap-0.5 lg:flex">
@@ -122,11 +125,7 @@ const subscribeHref = "#newsletter";
         >
           <Icon name="search" size={19} />
         </a>
-        <LocaleSwitcher class="max-sm:hidden" />
         <ThemeToggle class="text-current hover:bg-current/8" label={t.nav.toggleTheme} />
-        <Button href={subscribeHref} variant="primary" size="sm" class="hidden sm:inline-flex">
-          {t.nav.subscribe}
-        </Button>
         <SheetTrigger
           for="mobile-nav"
           variant="ghost"
@@ -146,16 +145,24 @@ const subscribeHref = "#newsletter";
 <Sheet id="mobile-nav" side="right" describedby={null}>
   <SheetClose />
   <SheetHeader>
-    <SheetTitle id="mobile-nav-title" class="flex items-center gap-2">
-      <Icon name="wave" size={20} class="text-primary" />
-      {siteData.name}
-    </SheetTitle>
+    <SheetTitle id="mobile-nav-title" class="flex items-center gap-3">
+     <BrandMark size={28} class="shrink-0 text-primary" />
+
+     <span class="flex flex-col items-start leading-none">
+      <span class="font-display text-lg font-semibold tracking-tight">
+       {siteData.name}
+      </span>
+      <span class="mt-1 text-[0.6rem] font-semibold uppercase tracking-[0.18em] text-current/70">
+        Cloud Security
+      </span>
+    </span>
+</SheetTitle>
   </SheetHeader>
 
   <nav aria-label={t.nav.mobileLabel}>
     <ul class="flex flex-col">
       {
-        [...navData, { text: t.nav.authors, href: routes.authors }, { text: t.nav.search, href: routes.search }].map(
+        [...navData, { text: t.nav.search, href: routes.search }].map(
           (item) => (
             <li>
               <a
@@ -172,12 +179,6 @@ const subscribeHref = "#newsletter";
     </ul>
   </nav>
 
-  <div class="mt-auto flex flex-col gap-4">
-    <Button href={subscribeHref} variant="primary" size="lg">{t.nav.subscribe}</Button>
-    {/* Sur mobile le selecteur vit dans le tiroir : la barre garde sa place
-        pour le menu et l'abonnement, qui comptent davantage a cette largeur. */}
-    <LocaleSwitcher variant="inline" class="self-center sm:hidden" />
-  </div>
 </Sheet>
 
 <script>

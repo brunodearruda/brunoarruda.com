@@ -1,0 +1,6 @@
+{
+  "name": "Identity & Access",
+  "description": "Identity, authentication, authorization, least privilege, and access control patterns for secure AWS environments.",
+  "accent": "reef",
+  "order": 1
+}

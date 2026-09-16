@@ -96,11 +96,6 @@ const t = useTranslations(locale);
 const routes = getSiteRoutes(locale);
 
 const title = t.home.aboutTitle;
-const accent = t.home.aboutAccent;
-const at = title.toLowerCase().indexOf(accent.toLowerCase());
-const before = at >= 0 ? title.slice(0, at) : title;
-const word = at >= 0 ? title.slice(at, at + accent.length) : "";
-const after = at >= 0 ? title.slice(at + accent.length) : "";
 ---
 
 <section
@@ -142,18 +137,11 @@ const after = at >= 0 ? title.slice(at + accent.length) : "";
           {t.about.eyebrow}
         </p>
 
-        <h2 id="studio-title" class="film__item font-display text-display-sm md:text-display-md mt-6 text-white">
-          {
-            word ? (
-              <Fragment>
-                {before}
-                <span class="accent-script">{word}</span>
-                {after}
-              </Fragment>
-            ) : (
-              title
-            )
-          }
+        <h2
+          id="studio-title"
+          class="film__item font-display text-display-sm md:text-display-md mt-6 whitespace-pre-line text-white"
+        >
+          {title}
         </h2>
 
         <p class="film__item measure-wide mt-6 leading-relaxed text-white/85 md:text-lg">

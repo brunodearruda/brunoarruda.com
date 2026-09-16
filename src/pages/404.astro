@@ -12,7 +12,7 @@
 // de chaque langue, nommee dans sa propre langue.
 import { Icon } from "@components/svg/icons";
 import { Button } from "@components/ui/button";
-import { defaultLocale, localeMeta, localePrefix, locales, useTranslations } from "@i18n";
+import { defaultLocale, localePrefix, useTranslations } from "@i18n";
 import BaseLayout from "@layouts/BaseLayout.astro";
 
 const t = useTranslations(defaultLocale);
@@ -27,7 +27,6 @@ const before = at >= 0 ? heading.slice(0, at) : heading;
 const word = at >= 0 ? heading.slice(at, at + accent.length) : "";
 const after = at >= 0 ? heading.slice(at + accent.length) : "";
 
-const others = locales.filter((locale) => locale !== defaultLocale);
 ---
 
 <BaseLayout {title} {description} noindex>
@@ -66,25 +65,6 @@ const others = locales.filter((locale) => locale !== defaultLocale);
         </Button>
       </div>
 
-      {
-        others.length > 0 && (
-          <ul class="mt-6 flex flex-wrap items-center justify-center gap-4">
-            {others.map((locale) => (
-              <li>
-                <a
-                  href={`${localePrefix(locale)}/`}
-                  hreflang={localeMeta[locale].htmlLang}
-                  lang={localeMeta[locale].htmlLang}
-                  class="text-muted-foreground hover:text-foreground inline-flex min-h-11 items-center gap-1.5 font-sans text-sm underline underline-offset-4 transition-colors duration-150"
-                >
-                  {localeMeta[locale].label}
-                  <Icon name="arrow-right" size={15} />
-                </a>
-              </li>
-            ))}
-          </ul>
-        )
-      }
     </div>
   </main>
 </BaseLayout>

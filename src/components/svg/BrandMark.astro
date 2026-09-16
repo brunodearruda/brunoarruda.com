@@ -1,0 +1,37 @@
+---
+// src/components/svg/BrandMark.astro - Bruno Arruda Architecture Layers brand mark.
+import type { HTMLAttributes } from "astro/types";
+
+type Props = HTMLAttributes<"svg"> & {
+  size?: number;
+};
+
+const { size = 32, class: className, ...rest } = Astro.props;
+---
+
+<svg
+  viewBox="0 0 32 32"
+  width={size}
+  height={size}
+  fill="none"
+  role="img"
+  aria-hidden="true"
+  class={className}
+  {...rest}
+>
+  <path
+    d="M16 3 28 9 16 15 4 9 16 3Z"
+    fill="currentColor"
+    opacity="1"
+  />
+  <path
+    d="M16 10.5 28 16.5 16 22.5 4 16.5 16 10.5Z"
+    fill="currentColor"
+    opacity=".78"
+  />
+  <path
+    d="M16 18 28 24 16 30 4 24 16 18Z"
+    fill="currentColor"
+    opacity=".56"
+  />
+</svg>

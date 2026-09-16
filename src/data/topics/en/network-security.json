@@ -1,0 +1,6 @@
+{
+  "name": "Network Security",
+  "description": "Secure AWS networking, traffic control, segmentation, connectivity, and protection of cloud network boundaries.",
+  "accent": "ink",
+  "order": 2
+}

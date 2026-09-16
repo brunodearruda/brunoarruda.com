@@ -1,0 +1,206 @@
+---
+// src/components/Sections/Lab/LabHero.astro - technical lab header with AWS services, security controls, evidence links, author, and dates.
+
+import { Avatar } from "@components/ui/avatar";
+import { Badge } from "@components/ui/badge";
+import { getSiteRoutes } from "@config/navData.json.ts";
+import { formatDate, getLocale, useTranslations } from "@i18n";
+import { entrySlug } from "@i18n/content";
+import { Image } from "astro:assets";
+import type { CollectionEntry } from "astro:content";
+
+type Props = {
+  lab: CollectionEntry<"labs">;
+  author: CollectionEntry<"authors">;
+  topic: CollectionEntry<"topics">;
+  class?: string;
+};
+
+const { lab, author, topic, class: className } = Astro.props;
+
+const locale = getLocale(Astro);
+const t = useTranslations(locale);
+const routes = getSiteRoutes(locale);
+
+const {
+  title,
+  description,
+  pubDate,
+  updatedDate,
+  awsServices,
+  securityControls,
+  github,
+  video,
+  cover,
+  coverAlt,
+  draft,
+} = lab.data;
+
+const topicHref = `${routes.topics}${entrySlug(topic.id)}/`;
+const authorHref = routes.about;
+
+const iso = (date: Date): string => date.toISOString();
+---
+
+<header class:list={["pt-28 pb-10 md:pt-36 md:pb-12", className]} data-slot="lab-hero">
+  <div class="container-page">
+    <div class="measure-prose mx-auto flex flex-col">
+      <p class="mb-4 flex flex-wrap items-center gap-3">
+        <span class="bg-primary inline-block h-px w-8 shrink-0" aria-hidden="true"></span>
+
+        <span
+          class="font-sans text-primary text-xs font-semibold tracking-[0.18em] uppercase"
+        >
+          Lab
+        </span>
+
+        <span class="text-muted-foreground" aria-hidden="true">·</span>
+
+        <a
+          href={topicHref}
+          class="font-sans text-muted-foreground hover:text-foreground text-xs font-medium tracking-[0.18em] uppercase transition-colors duration-150"
+        >
+          {topic.data.name}
+        </a>
+
+        {draft && <Badge variant="outline">{t.post.draft}</Badge>}
+      </p>
+
+      <h1
+        class="font-display text-display-sm md:text-display-md text-foreground"
+        transition:name={`lab-title-${entrySlug(lab.id)}`}
+      >
+        {title}
+      </h1>
+
+      <p class="text-muted-foreground mt-5 text-xl leading-[1.55] font-normal md:text-2xl md:leading-[1.5]">
+        {description}
+      </p>
+
+      {
+        (awsServices.length > 0 || securityControls.length > 0) && (
+          <div class="border-border mt-8 grid gap-6 border-t pt-6 md:grid-cols-2">
+            {awsServices.length > 0 && (
+              <div>
+                <p class="text-muted-foreground mb-3 font-sans text-xs font-semibold tracking-[0.16em] uppercase">
+                  AWS Services
+                </p>
+
+                <div class="flex flex-wrap gap-2">
+                  {awsServices.map((service) => (
+                    <Badge variant="outline">{service}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {securityControls.length > 0 && (
+              <div>
+                <p class="text-muted-foreground mb-3 font-sans text-xs font-semibold tracking-[0.16em] uppercase">
+                  Security Controls
+                </p>
+
+                <div class="flex flex-wrap gap-2">
+                  {securityControls.map((control) => (
+                    <Badge variant="outline">{control}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )
+      }
+
+      <div class="border-border mt-8 flex flex-wrap items-center gap-x-5 gap-y-4 border-t pt-5">
+        <div class="flex items-center gap-3">
+          <Avatar name={author.data.name} src={author.data.avatar?.src} size="md" alt="" />
+
+          <span class="flex flex-col">
+            <a
+              href={authorHref}
+              class="text-foreground decoration-primary/50 font-sans text-sm font-medium underline-offset-4 hover:underline"
+            >
+              {author.data.name}
+            </a>
+
+            <span class="text-muted-foreground font-sans text-xs">
+              {author.data.role}
+            </span>
+          </span>
+        </div>
+
+        <p class="text-muted-foreground flex flex-wrap items-center gap-x-5 gap-y-1 font-sans text-sm">
+          <span>
+            {t.post.published}{" "}
+            <time datetime={iso(pubDate)} class="text-foreground">
+              {formatDate(pubDate, locale)}
+            </time>
+          </span>
+
+          {
+            updatedDate && (
+              <span>
+                {t.post.updated}{" "}
+                <time datetime={iso(updatedDate)} class="text-foreground">
+                  {formatDate(updatedDate, locale)}
+                </time>
+              </span>
+            )
+          }
+        </p>
+      </div>
+
+      {
+        (github || video) && (
+          <div class="mt-6 flex flex-wrap gap-3">
+            {github && (
+              <a
+                href={github}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="border-border hover:border-primary hover:text-primary rounded-card border px-4 py-2 font-sans text-sm font-semibold transition-colors"
+              >
+                View on GitHub
+              </a>
+            )}
+
+            {video && (
+              <a
+                href={video}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="border-border hover:border-primary hover:text-primary rounded-card border px-4 py-2 font-sans text-sm font-semibold transition-colors"
+              >
+                Watch video
+              </a>
+            )}
+          </div>
+        )
+      }
+
+      {
+        draft && (
+          <p class="border-border bg-muted text-muted-foreground rounded-card mt-6 border p-4 font-sans text-sm leading-relaxed">
+            {t.post.draftNote}
+          </p>
+        )
+      }
+    </div>
+  </div>
+
+  {
+    cover && (
+      <figure class="container-page mt-10 md:mt-12">
+        <Image
+          src={cover}
+          alt={coverAlt ?? ""}
+          widths={[720, 1080, 1440]}
+          sizes="(min-width: 80rem) 72rem, 100vw"
+          class="rounded-card shadow-float measure-wide mx-auto w-full object-cover"
+          loading="eager"
+          decoding="async"
+        />
+      </figure>
+    )
+  }
+</header>

@@ -1,0 +1,90 @@
+---
+// src/pages/[...locale]/labs.astro
+// Technical portfolio of hands-on AWS cloud security labs.
+
+import LabGrid from "@components/Sections/Labs/LabGrid.astro";
+import TopicNav from "@components/Sections/Archive/TopicNav.astro";
+import Footer from "@components/Sections/Global/Footer.astro";
+import Navbar from "@components/Sections/Global/Navbar.astro";
+import PageHero from "@components/Sections/Global/PageHero.astro";
+
+import {
+  getLocale,
+  localePaths,
+  localizePath,
+} from "@i18n";
+
+import { getResolvedLabs } from "@js/labs";
+import { getSortedTopics } from "@js/posts";
+import { breadcrumbList } from "@js/schema";
+
+import BaseLayout from "@layouts/BaseLayout.astro";
+
+export const getStaticPaths = localePaths;
+
+const locale = getLocale(Astro);
+
+const labs = await getResolvedLabs(locale);
+const topics = await getSortedTopics(locale);
+
+const title = "AWS Cloud Security Labs | Bruno Arruda";
+
+const description =
+  "Hands-on AWS cloud security labs covering architecture, implementation, validation, security controls, and real-world technical scenarios.";
+
+const base = Astro.site ?? Astro.url;
+
+const crumbs = breadcrumbList([
+  {
+    name: "Home",
+    url: new URL(localizePath("/", locale), base).href,
+  },
+  {
+    name: "Labs",
+    url: new URL(localizePath("/labs/", locale), base).href,
+  },
+]);
+---
+
+<BaseLayout
+  {title}
+  {description}
+  image={{
+    src: "/og/labs.png",
+    alt: "Bruno Arruda | AWS Cloud Security Labs",
+  }}
+>
+  <Fragment slot="head">
+    <script
+      is:inline
+      type="application/ld+json"
+      set:html={JSON.stringify(crumbs)}
+    />
+  </Fragment>
+
+  <Navbar />
+
+  <main id="content">
+    <PageHero
+      eyebrow="LABS"
+      title="Cloud security, built in practice"
+      accentWord="practice"
+      lede="Hands-on AWS cloud security projects built around real-world scenarios, architecture decisions, implementation, validation, and security controls."
+      crumbs={[{ label: "Labs" }]}
+    >
+      <TopicNav
+        {topics}
+        {locale}
+        allHref={localizePath("/labs/", locale)}
+        class="mt-2"
+      />
+    </PageHero>
+
+    <LabGrid
+      {labs}
+      {locale}
+    />
+  </main>
+
+  <Footer />
+</BaseLayout>

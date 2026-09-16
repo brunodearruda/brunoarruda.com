@@ -14,14 +14,13 @@
 
 import { defaultLocale, isLocale, localeMeta, locales, type Locale } from "./config";
 import { en } from "./ui/en/index";
-import { fr } from "./ui/fr/index";
 import type { Dictionary } from "./ui/types";
 
 export { defaultLocale, isLocale, localeMeta, locales };
 export type { Locale };
 export type { Dictionary };
 
-const dictionaries: Record<Locale, Dictionary> = { en, fr };
+const dictionaries: Record<Locale, Dictionary> = { en };
 
 /** La copie de la langue demandee. Jamais de secours silencieux vers l'anglais :
  *  une cle manquante est impossible, le type l'interdit deja. */

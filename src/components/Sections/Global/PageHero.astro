@@ -49,8 +49,7 @@ type Props = VariantProps<typeof pageHero> & {
   /** Surtitre court au-dessus du titre : nomme la section, jamais une phrase. */
   eyebrow?: string;
   title: string;
-  /** Le mot du titre garde la police du titre, passe au turquoise et porte la
-   *  vague (.accent-script). Un seul, toujours. */
+  /** Le mot du titre garde la police du titre et passe au turquoise. Un seul, toujours. */
   accentWord?: string;
   lede?: string;
   /** Maillons apres l'accueil ; le dernier, sans href, devient la page courante. */
@@ -112,7 +111,7 @@ const after = at >= 0 ? title.slice(at + accent.length) : "";
         word ? (
           <Fragment>
             {before}
-            <span class="accent-script">{word}</span>
+            <span class="text-primary">{word}</span>
             {after}
           </Fragment>
         ) : (
