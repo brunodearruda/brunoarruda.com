@@ -43,7 +43,7 @@ jobs:
       - name: Build site
         run: pnpm build
 
-            - name: Verify CSP inline script hash
+      - name: Verify CSP inline script hash
         run: |
           EXPECTED_HASH="Bjj/TFrNJlmrwf3ZovlU3xOOuq33roauhi2llG7aE9g="
 
