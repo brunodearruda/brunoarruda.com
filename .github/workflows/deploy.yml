@@ -78,7 +78,11 @@ jobs:
             echo "::error::Inline script changed. Update and review the CloudFront CSP before deploying."
             exit 1
           fi  
-
+      - name: Debug OIDC claims
+        uses: github/actions-oidc-debugger@main
+        with:
+          audience: sts.amazonaws.com
+          
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v5
         with:
