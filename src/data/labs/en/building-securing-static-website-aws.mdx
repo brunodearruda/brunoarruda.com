@@ -13,7 +13,7 @@ socialImage: ../../../assets/labs/building-securing-static-website-aws/social-ca
 socialImageAlt: "Building and Securing a Production Static Website on AWS \u2014 cloud security case study by Bruno Arruda."
 github: https://github.com/brunodearruda/brunoarruda.com
 featured: true
-draft: true
+draft: false
 ---
 
 import LabAside from "@components/Sections/Labs/LabAside.astro";
@@ -391,7 +391,7 @@ The final model has three connected paths:
 The main technical takeaway is that controls become useful when their purpose, behavior, and limitations are understood and tested. For this site, secure delivery became part of the architecture and deployment process, with evidence and accepted trade-offs documented alongside the implementation.
 
 ## Resources and Implementation
-The public [website repository](https://github.com/brunodearruda/brunoarruda.com) contains the source and the deployment workflow at [`.github/workflows/deploy.yml`](https://github.com/brunodearruda/brunoarruda.com/blob/main/.github/workflows/deploy.yml).
+The public [website repository](https://github.com/brunodearruda/brunoarruda.com) contains the source and the deployment workflow at [`.github/workflows/deploy.yml`](https://github.com/brunodearruda/brunoarruda.com/blob/753b2beab1621554a445624c8130b4df69407718/.github/workflows/deploy.yml).
 
 The workflow demonstrates build → validation → CSP integrity check → GitHub OIDC authentication → S3 deployment → CloudFront invalidation.
 
