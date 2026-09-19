@@ -1,7 +1,7 @@
 <!-- wiki/subsystems/content.md - collections, demo data and the typed config layer that feed every page. -->
 ---
 title: Content and config
-summary: The three zod-validated collections in src/data, the typed config files in src/config, and how pages consume them.
+summary: The four zod-validated collections in src/data, the typed config files in src/config, and how pages consume them.
 sources:
   - src/content.config.ts
   - src/config/siteData.json.ts
@@ -20,7 +20,7 @@ layer contains presentation; components translate data into tokens.
 
 ## Collections (src/content.config.ts)
 
-Three collections, glob-loaded from src/data, validated by zod at build:
+Four collections, glob-loaded from src/data, validated by zod at build:
 
 - posts: Markdown or MDX files in src/data/posts, filed by language; the base
   file name is the shared slug (/blog/<slug>/). Frontmatter: title,
@@ -29,17 +29,20 @@ Three collections, glob-loaded from src/data, validated by zod at build:
   tags, an optional cover with alt text, `featured`, and `draft` defaulting to
   false. Drafts still build for local preview but are filtered from lists, RSS
   and llms.txt with `data.draft !== true`.
+- labs: Markdown or MDX technical case studies in src/data/labs. They remain a
+  separate content type, but share validated author and topic references with
+  posts. Draft Labs stay out of public lists and topic resource totals.
 - authors: one JSON per person in src/data/authors (name, role, bio, and an
   optional list of labelled links), resolved from posts via the reference.
 - topics: one JSON per subject in src/data/topics (name, description, an
   `accent` constrained to coral | reef | ink, and an `order`). Each topic has
-  its own archive page and its own description, so an archive is never a page
-  with nothing to index.
+  its own archive page and its own description. Topic pages keep article and
+  Lab grids separate, but use their combined published total for counts and
+  empty-state decisions.
 
-Demo content shipped: 9 posts, 3 authors, 5 topics, in two languages. The blog
-routes multiply from these entries (paginated index, per-post, per-topic and
-per-author pages), which is why the built site has more pages than src/pages
-has files.
+Content routes multiply from these entries (paginated indexes, detail pages,
+topic pages and author pages), which is why the built site has more pages than
+src/pages has files.
 
 ## Config (src/config/)
 

@@ -25,6 +25,8 @@ type Props = {
   total?: number;
   /** Niveau de titre des cartes, selon ce qui precede la grille dans la page. */
   headingLevel?: "h2" | "h3";
+  /** Titre facultatif du groupe, rendu avant le compteur et les cartes. */
+  heading?: string;
   /** Etat vide : le texte de l'archive par defaut, surchargeable par la page.
    *  Une page auteur sans billet ne dit pas la meme chose qu'une archive vide. */
   emptyTitle?: string;
@@ -43,6 +45,7 @@ const {
   totalPages = 1,
   total,
   headingLevel = "h3",
+  heading,
   emptyTitle,
   emptyDescription,
   emptyCtaLabel,
@@ -71,6 +74,11 @@ const countLabel =
       />
     ) : (
       <Fragment>
+        {heading && (
+          <h2 class="font-display text-foreground mb-4 text-2xl font-semibold tracking-tight">
+            {heading}
+          </h2>
+        )}
         {countLabel && (
           <p class="text-muted-foreground mb-8 font-sans text-sm tabular-nums">
             {countLabel}

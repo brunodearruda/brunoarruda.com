@@ -1,5 +1,5 @@
 ---
-// src/pages/[...locale]/topics/index.astro - l'index des sujets : une carte par fil, avec le nombre de billets publies derriere chacun.
+// src/pages/[...locale]/topics/index.astro - l'index des sujets et leurs ressources publiees.
 import TopicCard from "@components/Cards/TopicCard.astro";
 import Footer from "@components/Sections/Global/Footer.astro";
 import Navbar from "@components/Sections/Global/Navbar.astro";
@@ -7,8 +7,10 @@ import PageHero from "@components/Sections/Global/PageHero.astro";
 import { getSiteRoutes } from "@config/navData.json.ts";
 import { getLocale, localePaths, localizePath, useTranslations } from "@i18n";
 import { entrySlug } from "@i18n/content";
+import { getResolvedLabs } from "@js/labs";
 import { getResolvedPosts, getSortedTopics } from "@js/posts";
 import { breadcrumbList } from "@js/schema";
+import { topicContentFor } from "@js/topics";
 import BaseLayout from "@layouts/BaseLayout.astro";
 
 export const getStaticPaths = localePaths;
@@ -17,11 +19,11 @@ const locale = getLocale(Astro);
 const t = useTranslations(locale);
 const routes = getSiteRoutes(locale);
 
-const topics = await getSortedTopics(locale);
-const posts = await getResolvedPosts(locale);
-
-const counts: Record<string, number> = {};
-for (const entry of posts) counts[entry.topicSlug] = (counts[entry.topicSlug] ?? 0) + 1;
+const [topics, posts, labs] = await Promise.all([
+  getSortedTopics(locale),
+  getResolvedPosts(locale),
+  getResolvedLabs(locale),
+]);
 
 const title = t.topics.metaTitle;
 const description = t.topics.metaDescription;
@@ -71,13 +73,14 @@ const firstWide = topics.length - tail;
         {
           topics.map((topic, i) => {
             const slug = entrySlug(topic.id);
+            const content = topicContentFor(slug, posts, labs);
             return (
               <li class:list={["flex", i >= firstWide ? "lg:col-span-3" : "lg:col-span-2"]}>
                 <TopicCard
                   {topic}
                   {locale}
                   href={`${routes.topics}${slug}/`}
-                  count={counts[slug] ?? 0}
+                  count={content.totalCount}
                   as="h2"
                   class="w-full"
                 />

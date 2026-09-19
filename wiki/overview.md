@@ -49,7 +49,7 @@ runtime dependencies in total.
 Sideways of the cake: src/js holds pure logic (JSON-LD constructors,
 pagination, text utilities), src/config holds typed site data, src/i18n holds
 the bilingual layer and the two dictionaries (see [i18n](subsystems/i18n.md)),
-and src/content.config.ts declares the posts, authors and topics collections
+and src/content.config.ts declares the posts, Labs, authors and topics collections
 (see [content](subsystems/content.md)) whose files live under src/data/ with
 identical slugs per language.
 
@@ -83,6 +83,11 @@ carries an Article node plus breadcrumbList.
 A Lab follows the same reading layout but remains a separate collection. Its
 detail route emits TechArticle plus breadcrumbList, and metadata chooses an
 optional social image before its visible cover and the global default.
+
+A Topic groups published posts and Labs without merging their collections.
+Its index count is the combined resource total, while the detail page keeps
+the article and Lab grids separate and shows one empty state only when both
+collections are empty.
 
 ## What the build emits
 

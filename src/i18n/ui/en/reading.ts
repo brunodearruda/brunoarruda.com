@@ -93,7 +93,6 @@ export const enReading = {
   listLabel: "Article list",
   paginationLabel: "Article pagination",
 
-  topicTitle: "Articles about {topic}",
   tagTitle: "Articles tagged {tag}",
 
   countLabel: "{count} articles",

@@ -9,12 +9,16 @@ import EmptyState from "@components/Sections/Archive/EmptyState.astro";
 type Props = {
   labs: ResolvedLab[];
   locale: Locale;
+  heading?: string;
+  headingLevel?: "h2" | "h3";
   class?: string;
 };
 
 const {
   labs,
   locale,
+  heading,
+  headingLevel = "h2",
   class: className,
 }: Props = Astro.props;
 
@@ -33,21 +37,28 @@ const t = useTranslations(locale);
         icon="code"
       />
     ) : (
-      <ul
-        class="grid grid-cols-1 gap-6 md:grid-cols-2"
-        aria-label={t.labs.listLabel}
-      >
-        {labs.map((entry) => (
-          <li class="flex">
-            <LabCard
-              {entry}
-              {locale}
-              as="h2"
-              class="w-full"
-            />
-          </li>
-        ))}
-      </ul>
+      <Fragment>
+        {heading && (
+          <h2 class="font-display text-foreground mb-8 text-2xl font-semibold tracking-tight">
+            {heading}
+          </h2>
+        )}
+        <ul
+          class="grid grid-cols-1 gap-6 md:grid-cols-2"
+          aria-label={t.labs.listLabel}
+        >
+          {labs.map((entry) => (
+            <li class="flex">
+              <LabCard
+                {entry}
+                {locale}
+                as={headingLevel}
+                class="w-full"
+              />
+            </li>
+          ))}
+        </ul>
+      </Fragment>
     )
   }
 </section>

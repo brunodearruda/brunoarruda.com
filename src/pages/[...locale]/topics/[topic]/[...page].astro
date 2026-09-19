@@ -5,6 +5,7 @@
 // l'id de collection vaut "en/typography", et l'ecrire tel quel donnerait
 // /topics/en/typography/, une URL que personne n'a demandee.
 import PostGrid from "@components/Sections/Archive/PostGrid.astro";
+import EmptyState from "@components/Sections/Archive/EmptyState.astro";
 import LabGrid from "@components/Sections/Labs/LabGrid.astro";
 import TopicNav from "@components/Sections/Archive/TopicNav.astro";
 import Footer from "@components/Sections/Global/Footer.astro";
@@ -15,6 +16,7 @@ import { entrySlug } from "@i18n/content";
 import { getResolvedLabs } from "@js/labs";
 import { getResolvedPosts, getSortedTopics } from "@js/posts";
 import { breadcrumbList } from "@js/schema";
+import { topicContentFor } from "@js/topics";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import type { GetStaticPaths, Page } from "astro";
 import type { CollectionEntry } from "astro:content";
@@ -29,13 +31,12 @@ export const getStaticPaths = (async ({ paginate }) => {
 
       return topics.flatMap((topic) => {
         const slug = entrySlug(topic.id);
-        const inTopic = posts.filter((entry) => entry.topicSlug === slug);
-        const labsInTopic = labs.filter((entry) => entry.topicSlug === slug);
+        const content = topicContentFor(slug, posts, labs);
 
-        return paginate(inTopic, {
+        return paginate(content.articles, {
           pageSize: 9,
           params: { locale: locale === defaultLocale ? undefined : locale, topic: slug },
-          props: { topic, topics, labsInTopic },
+          props: { topic, topics, labsInTopic: content.labs },
         });
       });
     }),
@@ -55,7 +56,11 @@ const locale = getLocale(Astro);
 const t = useTranslations(locale);
 
 const slug = entrySlug(topic.id);
-const heading = fmt(t.archive.topicTitle, { topic: topic.data.name });
+const heading = fmt(t.topics.topicTitle, { topic: topic.data.name });
+const articleCount = page.total;
+const labCount = labsInTopic.length;
+const totalCount = articleCount + labCount;
+const hasContent = totalCount > 0;
 const title =
   page.currentPage > 1
     ? `${heading}, ${fmt(t.archive.pageSuffix, { n: page.currentPage })}`
@@ -93,26 +98,42 @@ const noindex = page.currentPage > 1;
       <TopicNav {topics} {locale} activeSlug={slug} class="mt-2" />
     </PageHero>
 
-    <PostGrid
-      posts={page.data}
-      {locale}
-      basePath={localizePath(`/topics/${slug}`, locale)}
-      currentPage={page.currentPage}
-      totalPages={page.lastPage}
-      total={page.total}
-      headingLevel="h2"
-      emptyTitle={t.topics.emptyTitle}
-      emptyDescription={t.topics.emptyLede}
-      emptyCtaLabel={t.archive.emptyCta}
-      emptyCtaHref={localizePath("/blog/", locale)}
-    />
     {
-      page.currentPage === 1 && labsInTopic.length > 0 && (
+      articleCount > 0 && (
+        <PostGrid
+          posts={page.data}
+          {locale}
+          basePath={localizePath(`/topics/${slug}`, locale)}
+          currentPage={page.currentPage}
+          totalPages={page.lastPage}
+          total={articleCount}
+          heading={t.topics.articlesTitle}
+          headingLevel="h3"
+        />
+      )
+    }
+    {
+      page.currentPage === 1 && labCount > 0 && (
        <LabGrid
          labs={labsInTopic}
          {locale}
+         heading={t.topics.labsTitle}
+         headingLevel="h3"
        />
      )
+    }
+    {
+      !hasContent && (
+        <section class="container-page py-14 md:py-20">
+          <EmptyState
+            title={t.topics.emptyTitle}
+            description={t.topics.emptyLede}
+            icon="file-text"
+            ctaLabel={t.topics.emptyCta}
+            ctaHref={localizePath("/topics/", locale)}
+          />
+        </section>
+      )
     }
   </main>
 

@@ -13,6 +13,12 @@ nothing needed updating. Open threads are questions or known gaps waiting on
 a decision; close them by editing this list and noting the resolution in a
 dated entry.
 
+## 2026-09-19 - Topics count articles and Labs
+
+- Topic cards now count published articles and Labs as resources.
+- Topic pages keep both grids separate and show one empty state only when
+  neither collection has published content for that topic.
+
 ## 2026-09-19 - Person identity, TechArticle Labs and social metadata
 
 - Bruno Arruda is one canonical Person entity with a stable `#person` id on

@@ -216,13 +216,17 @@ backgroundYearsLede: "working across technology infrastructure and security.",
     accent: "cloud security",
     lede:
       "Browse practical articles and labs organized around the core areas of AWS cloud security, from identity and network protection to detection, data protection, and secure architecture.",
-    /** {count} vient du nombre d'articles publies dans le sujet. */
-    countLabel: "{count} posts",
-    countOne: "1 post",
+    topicTitle: "Resources about {topic}",
+    articlesTitle: "Articles",
+    labsTitle: "Labs",
+    /** {count} additionne les articles et Labs publies dans le sujet. */
+    countLabel: "{count} resources",
+    countOne: "1 resource",
     readTopic: "Read this topic",
     allTopics: "All topics",
-    emptyTitle: "Nothing filed here yet",
-    emptyLede: "The topic is open and the first post is still a draft. The RSS feed will say when it lands.",
+    emptyTitle: "Nothing published here yet",
+    emptyLede: "Articles and Labs for this topic are still in progress.",
+    emptyCta: "Explore topics",
   },
 
   // --- Recherche -----------------------------------------------------------
