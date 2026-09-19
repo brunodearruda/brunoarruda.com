@@ -3,7 +3,7 @@
 title: Wiki log
 summary: Dated journal of code changes reflected in the wiki, and the list of open threads.
 sources: []
-updated: 2026-09-02
+updated: 2026-09-19
 ---
 
 # Wiki log
@@ -12,6 +12,16 @@ Newest entry first. Every `wiki sync` appends an entry here, even when
 nothing needed updating. Open threads are questions or known gaps waiting on
 a decision; close them by editing this list and noting the resolution in a
 dated entry.
+
+## 2026-09-19 - Person identity, TechArticle Labs and social metadata
+
+- Bruno Arruda is one canonical Person entity with a stable `#person` id on
+  Home, About, Blog articles and Labs. Personal articles reference that Person
+  as publisher instead of inventing an Organization with the same name.
+- Blog detail pages remain Article. Lab detail pages explicitly emit
+  TechArticle and use their visible topic as articleSection.
+- Labs can select a metadata-only social image without rendering it as a cover.
+  The precedence is social image, visible cover, then the global default.
 
 ## 2026-09-02 - 1.7.0, the halos are gone and the language switch is a switch
 

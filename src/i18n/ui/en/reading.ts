@@ -5,8 +5,8 @@
 // Les libelles qui bordent le texte (dates, temps de lecture, sommaire, partage,
 // article suivant) sont lus a chaque visite, donc ils meritent d'etre ecrits.
 //
-// Trois sections : `post` (la page d'article), `archive` (les listes et leurs
-// etats vides), `newsletter` (le bloc d'inscription, reutilise ailleurs).
+// Quatre sections : `post` (la page d'article), `lab` (la lecture pratique),
+// `archive` (les listes et leurs etats vides), `newsletter` (l'inscription).
 
 export const enReading = {
   // --- Page d'article ------------------------------------------------------
@@ -51,6 +51,24 @@ export const enReading = {
     draftNote:
       "This post is unpublished. It builds locally for preview and stays out of the lists, the RSS feed, the sitemap and search.",
     /** Libelle du curseur contextuel au survol d'une carte de billet. */
+  },
+
+  // --- Page de Lab ---------------------------------------------------------
+  lab: {
+    eyebrow: "Lab",
+    awsServices: "AWS services",
+    securityFocus: "Security focus",
+    viewGithub: "View on GitHub",
+    watchVideo: "Watch video",
+    draft: "Draft",
+    draftNote:
+      "This Lab is unpublished. It is available locally for review and stays out of public listings and production builds.",
+    navLabel: "Lab navigation",
+    backToLabs: "Back to Labs",
+    viewRepository: "View repository",
+    asideThreat: "Threat",
+    asideDecision: "Decision",
+    asideTradeoff: "Trade-off",
   },
 
   // --- Archives et listes --------------------------------------------------

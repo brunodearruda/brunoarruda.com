@@ -14,6 +14,7 @@ import {
   breadcrumbList,
   faqPage,
   organization,
+  person,
   softwareApplication,
   website,
 } from "./schema.ts";
@@ -37,6 +38,22 @@ is(
   "organization keeps its social profiles",
 );
 
+// person : une identite canonique complete, reutilisable par son @id.
+const author = {
+  id: "https://example.com/#person",
+  name: "Example Author",
+  url: "https://example.com/",
+  sameAs: ["https://www.linkedin.com/in/example", "https://github.com/example"],
+  jobTitle: "Cloud Security & Infrastructure Professional",
+};
+const identity = person(author);
+is(identity["@type"], "Person", "person declares its type");
+is(identity["@id"], author.id, "person keeps its canonical id");
+is(identity.name, author.name, "person keeps its name");
+is(identity.url, author.url, "person keeps its canonical url");
+is(identity.sameAs, author.sameAs, "person keeps LinkedIn and GitHub profiles");
+is(identity.jobTitle, author.jobTitle, "person keeps the factual job title");
+
 // website : forme exacte.
 const site = website({ name: "Example Studio", url: "https://example.com/", description: "A demonstration site, used here as a fixture." });
 is(
@@ -57,12 +74,23 @@ const post = article({
   description: "How the fixture exercises every builder.",
   url: "https://example.com/blog/reading-the-room/",
   datePublished: new Date("2026-05-04T08:00:00.000Z"),
-  authorName: "Example Author",
+  author,
 });
 is(post["@type"], "Article", "article declares its type");
 is(post.datePublished, "2026-05-04T08:00:00.000Z", "a Date is converted to ISO 8601");
 is(post.mainEntityOfPage, post.url, "mainEntityOfPage mirrors the canonical url");
-is(post.author, { "@type": "Person", name: "Example Author" }, "author is a nested Person without @context");
+is(
+  post.author,
+  {
+    "@type": "Person",
+    "@id": author.id,
+    name: author.name,
+    url: author.url,
+    sameAs: author.sameAs,
+    jobTitle: author.jobTitle,
+  },
+  "article author reuses the canonical Person identity",
+);
 assert.ok(!("dateModified" in post), "an absent dateModified is not serialized");
 assert.ok(!("publisher" in post), "an absent publisher is not serialized");
 checks += 2;
@@ -72,11 +100,29 @@ is(
     description: "d",
     url: "https://example.com/blog/t/",
     datePublished: "2026-05-04",
-    authorName: "Example Author",
+    author,
   }).datePublished,
   "2026-05-04",
   "a preformatted date string passes through untouched",
 );
+
+const lab = article({
+  type: "TechArticle",
+  title: "A technical lab",
+  description: "A focused technical case study.",
+  url: "https://example.com/labs/a-technical-lab/",
+  datePublished: "2026-09-19",
+  image: "https://example.com/lab-social.png",
+  author,
+  publisherId: author.id,
+  articleSection: "Secure Architecture",
+});
+is(lab["@type"], "TechArticle", "a Lab can declare TechArticle without changing Article defaults");
+is(lab.author, post.author, "Article and TechArticle reuse the same Person author");
+is(lab.publisher, { "@id": author.id }, "publisher references the canonical Person");
+is(lab.articleSection, "Secure Architecture", "TechArticle carries its visible topic");
+assert.ok(!("dateModified" in lab), "TechArticle omits an absent dateModified");
+checks += 1;
 
 // faqPage : une paire Question/Answer par entree.
 const faq = faqPage([
@@ -136,7 +182,7 @@ assert.ok(
 checks += 1;
 
 // Contrat commun : chaque noeud porte le @context racine et survit tel quel a JSON.
-for (const node of [org, site, post, faq, trail, app]) {
+for (const node of [org, identity, site, post, lab, faq, trail, app]) {
   is(node["@context"], "https://schema.org", `every node declares the schema.org context (${node["@type"]})`);
   is(JSON.parse(JSON.stringify(node)), node, `every node survives a JSON round-trip unchanged (${node["@type"]})`);
 }

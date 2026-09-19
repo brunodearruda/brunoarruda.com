@@ -10,6 +10,7 @@ const siteData: SiteDataProps = {
   useViewTransitions: true,
 
   author: {
+    contentId: "bruno-arruda",
     name: "Bruno Arruda",
     email: "contato@brunoarruda.com",
     linkedin: "https://www.linkedin.com/in/brunodearruda",

@@ -1,0 +1,225 @@
+---
+// src/components/Sections/Labs/LabDataTable.astro - tableau de Lab lisible en colonnes sur grand ecran et en forme compacte sur mobile.
+
+type MobileLayout = "compact" | "stacked";
+
+type Props = {
+  caption: string;
+  columns: string[];
+  rows: string[][];
+  mobileLayout: MobileLayout;
+  mobileColumns?: number[];
+  statusColumn?: number;
+  class?: string;
+};
+
+const {
+  caption,
+  columns,
+  rows,
+  mobileLayout,
+  mobileColumns,
+  statusColumn,
+  class: className,
+} = Astro.props;
+
+if (columns.length < 2 || rows.some((row) => row.length !== columns.length)) {
+  throw new Error("LabDataTable exige des lignes alignees sur ses colonnes");
+}
+
+const allColumnIndexes = columns.map((_, index) => index);
+const visibleMobileColumns = mobileColumns ?? allColumnIndexes;
+if (
+  visibleMobileColumns.length === 0 ||
+  visibleMobileColumns.some((index) => index < 0 || index >= columns.length)
+) {
+  throw new Error("LabDataTable a recu un index de colonne mobile invalide");
+}
+if (statusColumn !== undefined && (statusColumn < 0 || statusColumn >= columns.length)) {
+  throw new Error("LabDataTable a recu un index de statut invalide");
+}
+
+const hiddenMobileColumns = allColumnIndexes.filter(
+  (index) => !visibleMobileColumns.includes(index),
+);
+const lastVisibleMobileColumn = visibleMobileColumns.at(-1);
+---
+
+<div class:list={["lab-data-table", className]} data-slot="lab-data-table">
+  <div class="lab-table-desktop">
+    <table>
+      <caption class="sr-only">{caption}</caption>
+      <thead>
+        <tr>
+          {columns.map((column) => <th scope="col">{column}</th>)}
+        </tr>
+      </thead>
+      <tbody>
+        {
+          rows.map((row) => (
+            <tr>
+              {row.map((cell, columnIndex) => (
+                <td>
+                  {columnIndex === statusColumn && cell === "PASS" ? (
+                    <span class="lab-table-status">
+                      <span aria-hidden="true">✓</span>
+                      <span>{cell}</span>
+                    </span>
+                  ) : (
+                    cell
+                  )}
+                </td>
+              ))}
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  {
+    mobileLayout === "compact" ? (
+      <div class="lab-table-mobile lab-table-compact">
+        <table>
+          <caption class="sr-only">{caption}</caption>
+          <thead>
+            <tr>
+              {visibleMobileColumns.map((columnIndex) => (
+                <th scope="col">{columns[columnIndex]}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr>
+                {visibleMobileColumns.map((columnIndex) => (
+                  <td>
+                    {row[columnIndex]}
+                    {columnIndex === lastVisibleMobileColumn && hiddenMobileColumns.length > 0 && (
+                      <span class="sr-only">
+                        {hiddenMobileColumns.map(
+                          (hiddenIndex) =>
+                            ` ${columns[hiddenIndex]}: ${row[hiddenIndex]}.`,
+                        )}
+                      </span>
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    ) : (
+      <dl class="lab-table-mobile lab-table-stacked" aria-label={caption}>
+        {rows.map((row) => (
+          <div class="lab-table-row">
+            <dt>
+              <span class="sr-only">{columns[visibleMobileColumns[0]]}: </span>
+              {row[visibleMobileColumns[0]]}
+            </dt>
+            {visibleMobileColumns.slice(1).map((columnIndex) => (
+              <dd>
+                <span class="lab-table-label">{columns[columnIndex]}</span>
+                <span>{row[columnIndex]}</span>
+                {columnIndex === lastVisibleMobileColumn && hiddenMobileColumns.length > 0 && (
+                  <span class="sr-only">
+                    {hiddenMobileColumns.map(
+                      (hiddenIndex) => ` ${columns[hiddenIndex]}: ${row[hiddenIndex]}.`,
+                    )}
+                  </span>
+                )}
+              </dd>
+            ))}
+          </div>
+        ))}
+      </dl>
+    )
+  }
+</div>
+
+<style>
+  .lab-data-table {
+    margin-block-end: var(--prose-flow);
+  }
+
+  .lab-data-table :global(table) {
+    margin-block-end: 0;
+  }
+
+  .lab-table-desktop {
+    display: none;
+  }
+
+  .lab-table-mobile :global(th),
+  .lab-table-mobile :global(td) {
+    overflow-wrap: anywhere;
+  }
+
+  .lab-table-compact :global(table) {
+    display: table;
+    table-layout: fixed;
+  }
+
+  .lab-table-compact :global(th:first-child),
+  .lab-table-compact :global(td:first-child) {
+    inline-size: 42%;
+  }
+
+  .lab-table-stacked {
+    margin-block: 0;
+  }
+
+  .lab-table-row {
+    padding-block: 1rem;
+    border-block-end: 1px solid var(--prose-rule);
+  }
+
+  .lab-table-row:first-child {
+    padding-block-start: 0;
+  }
+
+  .lab-table-row dt {
+    margin: 0 0 0.7rem;
+    color: var(--color-foreground);
+    font-weight: 650;
+  }
+
+  .lab-table-row dd {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.2rem;
+    margin: 0 0 0.65rem;
+  }
+
+  .lab-table-row dd:last-of-type {
+    margin-block-end: 0;
+  }
+
+  .lab-table-label {
+    color: var(--color-muted-foreground);
+    font-family: var(--font-sans);
+    font-size: 0.72em;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .lab-table-status {
+    display: inline-flex;
+    gap: 0.35em;
+    align-items: baseline;
+    white-space: nowrap;
+    font-weight: 650;
+  }
+
+  @media (min-width: 40rem) {
+    .lab-table-desktop {
+      display: block;
+    }
+
+    .lab-table-mobile {
+      display: none;
+    }
+  }
+</style>

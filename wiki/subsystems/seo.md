@@ -6,13 +6,15 @@ sources:
   - src/layouts/BaseHead.astro
   - src/js/schema.ts
   - src/js/schema.selfcheck.ts
+  - src/js/metadata.ts
+  - src/pages/[...locale]/labs/[id].astro
   - src/pages/robots.txt.ts
   - src/pages/llms.txt.ts
   - src/pages/[...locale]/rss.xml.ts
   - scripts/og.mjs
   - astro.config.mjs
   - src/i18n/index.ts
-updated: 2026-08-15
+updated: 2026-09-19
 ---
 
 # SEO layer
@@ -46,20 +48,18 @@ One component writes the entire `<head>`:
 
 ## JSON-LD constructors (src/js/schema.ts)
 
-Six typed builders return plain objects ready for JSON.stringify:
-organization (:30), website (:48), article (:72), faqPage (:105),
-breadcrumbList (:126), softwareApplication (:154). This blog uses organization,
-website, article and breadcrumbList; faqPage and softwareApplication ship in the
-module but no page declares them. Shared behavior: `compact()` strips undefined
-keys (:13-15), dates normalize to ISO 8601 (:18-20), nested Person and
-Organization nodes carry no `@context`, and a price of zero survives
-(:146-147). The selfcheck (src/js/schema.selfcheck.ts, 29 assertions, run
-with `node src/js/schema.selfcheck.ts`) pins all of this.
+Typed builders return plain objects ready for JSON.stringify. The canonical
+site identity is a Person with one stable `@id`; Home and About emit that full
+node, while articles reuse it for author and publisher relationships. The
+article builder defaults to Article for Blog posts and accepts TechArticle for
+Labs. Shared behavior: `compact()` strips undefined keys, dates normalize to
+ISO 8601, nested nodes carry no `@context`, and a price of zero survives. The
+selfcheck in src/js/schema.selfcheck.ts pins these contracts.
 
 Usage pattern: pages build an array of nodes and inject them through
-`<Fragment slot="head">`. Placement as built: the home carries organization +
-website only (index.astro), a post carries article + breadcrumbList
-(blog/[id].astro), and the topic and author archives carry breadcrumbList.
+`<Fragment slot="head">`. Placement as built: Home carries Person + WebSite,
+About carries the same Person + BreadcrumbList, a post carries Article +
+BreadcrumbList, and a Lab carries TechArticle + BreadcrumbList.
 
 ## The text endpoints
 
@@ -82,3 +82,7 @@ template whose colors come from tokens.css (og.mjs:29-31), rasterized by
 sharp. `pnpm og` regenerates them; run it after `pnpm rebrand`. Pages choose
 their card through the `image` prop of BaseLayout, whose shape requires alt
 text (src/layouts/BaseHead.astro:27).
+
+Labs may define `socialImage` plus `socialImageAlt` independently from their
+visible cover. src/js/metadata.ts enforces the selection order: social image,
+visible cover, global default.

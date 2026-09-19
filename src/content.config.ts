@@ -1,4 +1,4 @@
-// src/content.config.ts - les trois collections de Reef (posts, authors, topics), chargees par glob depuis src/data.
+// src/content.config.ts - les quatre collections de Reef (posts, labs, authors, topics), chargees par glob depuis src/data.
 //
 // Le contenu est range par langue : src/data/posts/en/... et src/data/posts/fr/...
 // Le loader glob fabrique donc des id prefixes ("en/mon-article"), ce qui donne
@@ -35,46 +35,72 @@ const posts = defineCollection({
       // Un seul article a la une par langue. Le garde-fou est dans la page
       // d'accueil, pas ici : le schema ne peut pas compter les autres fichiers.
       featured: z.boolean().default(false),
-      // Un brouillon reste constructible en local mais sort des listes, du RSS,
-      // du sitemap et du llms.txt, et part en noindex.
+      // Un brouillon reste constructible en local mais sort des listes, du RSS
+      // et du llms.txt, et part en noindex.
       draft: z.boolean().default(false),
     }),
 });
 
-// Technical labs and hands-on cloud security projects.
-// Labs are separate from articles because they represent practical work:
-// architecture, implementation, validation, and security decisions.
+// Les Labs techniques et les projets pratiques de securite cloud. Ils restent
+// separes des articles car ils portent une architecture, une mise en oeuvre,
+// une validation et les decisions de securite qui relient les trois.
 const labs = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/data/labs" }),
   schema: ({ image }) =>
-    z.object({
-      title: z.string(),
-      description: z.string(),
+    z
+      .object({
+        title: z.string(),
+        description: z.string(),
 
-      pubDate: z.coerce.date(),
-      updatedDate: z.coerce.date().optional(),
+        pubDate: z.coerce.date(),
+        updatedDate: z.coerce.date().optional(),
 
-      author: reference("authors"),
-      topic: reference("topics"),
+        author: reference("authors"),
+        topic: reference("topics"),
 
-      tags: z.array(z.string()).default([]),
+        tags: z.array(z.string()).default([]),
 
-      // AWS services directly involved in the lab.
-      awsServices: z.array(z.string()).default([]),
+        // Services AWS directement impliques dans le Lab.
+        awsServices: z.array(z.string()).default([]),
+        // Sous-ensemble editorial facultatif pour garder l'en-tete lisible.
+        heroServices: z.array(z.string().min(1)).min(1).max(6).optional(),
 
-      // Security principles or controls demonstrated by the lab.
-      securityControls: z.array(z.string()).default([]),
+        // Principes ou controles de securite demontres par le Lab.
+        securityControls: z.array(z.string()).default([]),
+        heroSecurityControls: z.array(z.string().min(1)).min(1).max(6).optional(),
 
-      cover: image().optional(),
-      coverAlt: z.string().optional(),
+        cover: image().optional(),
+        coverAlt: z.string().optional(),
 
-      // External evidence / demonstrations.
-      github: z.url().optional(),
-      video: z.url().optional(),
+        // Carte sociale facultative, independante de la couverture visible.
+        socialImage: image().optional(),
+        socialImageAlt: z.string().optional(),
 
-      featured: z.boolean().default(false),
-      draft: z.boolean().default(false),
-    }),
+        // Preuves et demonstrations externes.
+        github: z.url().optional(),
+        video: z.url().optional(),
+
+        featured: z.boolean().default(false),
+        draft: z.boolean().default(false),
+      })
+      .superRefine((data, ctx) => {
+        // Une couverture impose une decision explicite : texte utile, ou chaine
+        // vide seulement si l'image est vraiment decorative.
+        if (data.cover && data.coverAlt === undefined) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["coverAlt"],
+            message: "coverAlt doit etre renseigne quand cover est present",
+          });
+        }
+        if (data.socialImage && data.socialImageAlt === undefined) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["socialImageAlt"],
+            message: "socialImageAlt doit etre renseigne quand socialImage est present",
+          });
+        }
+      }),
 });
 
 // Les auteurs : un JSON par personne, reference par les articles.

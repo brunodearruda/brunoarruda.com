@@ -1,11 +1,14 @@
 ---
-// src/components/Sections/Lab/LabHero.astro - technical lab header with AWS services, security controls, evidence links, author, and dates.
+// src/components/Sections/Labs/LabHero.astro - en-tete editorial d'un Lab : contexte, metadonnees, preuves, auteur et dates.
 
+import { Icon } from "@components/svg/icons";
 import { Avatar } from "@components/ui/avatar";
 import { Badge } from "@components/ui/badge";
+import { Button } from "@components/ui/button";
 import { getSiteRoutes } from "@config/navData.json.ts";
-import { formatDate, getLocale, useTranslations } from "@i18n";
+import { fmt, formatDate, getLocale, useTranslations } from "@i18n";
 import { entrySlug } from "@i18n/content";
+import { readingTime } from "@js/textUtils";
 import { Image } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
 
@@ -28,7 +31,9 @@ const {
   pubDate,
   updatedDate,
   awsServices,
+  heroServices,
   securityControls,
+  heroSecurityControls,
   github,
   video,
   cover,
@@ -36,8 +41,13 @@ const {
   draft,
 } = lab.data;
 
+const displayedServices = heroServices ?? awsServices.slice(0, 6);
+const displayedSecurityControls = heroSecurityControls ?? securityControls.slice(0, 6);
+
 const topicHref = `${routes.topics}${entrySlug(topic.id)}/`;
 const authorHref = routes.about;
+const { minutes } = readingTime(lab.body ?? "");
+const readingLabel = minutes === 1 ? t.post.minReadOne : fmt(t.post.minRead, { n: minutes });
 
 const iso = (date: Date): string => date.toISOString();
 ---
@@ -51,7 +61,7 @@ const iso = (date: Date): string => date.toISOString();
         <span
           class="font-sans text-primary text-xs font-semibold tracking-[0.18em] uppercase"
         >
-          Lab
+          {t.lab.eyebrow}
         </span>
 
         <span class="text-muted-foreground" aria-hidden="true">·</span>
@@ -63,7 +73,7 @@ const iso = (date: Date): string => date.toISOString();
           {topic.data.name}
         </a>
 
-        {draft && <Badge variant="outline">{t.post.draft}</Badge>}
+        {draft && <Badge variant="outline">{t.lab.draft}</Badge>}
       </p>
 
       <h1
@@ -78,36 +88,30 @@ const iso = (date: Date): string => date.toISOString();
       </p>
 
       {
-        (awsServices.length > 0 || securityControls.length > 0) && (
-          <div class="border-border mt-8 grid gap-6 border-t pt-6 md:grid-cols-2">
-            {awsServices.length > 0 && (
+        (displayedServices.length > 0 || displayedSecurityControls.length > 0) && (
+          <dl class="border-border mt-8 grid gap-5 border-t pt-6 md:grid-cols-2 md:gap-8">
+            {displayedServices.length > 0 && (
               <div>
-                <p class="text-muted-foreground mb-3 font-sans text-xs font-semibold tracking-[0.16em] uppercase">
-                  AWS Services
-                </p>
-
-                <div class="flex flex-wrap gap-2">
-                  {awsServices.map((service) => (
-                    <Badge variant="outline">{service}</Badge>
-                  ))}
-                </div>
+                <dt class="text-muted-foreground mb-2 font-sans text-xs font-semibold tracking-[0.16em] uppercase">
+                  {t.lab.awsServices}
+                </dt>
+                <dd class="text-foreground/85 font-sans text-sm leading-relaxed">
+                  {displayedServices.join(" · ")}
+                </dd>
               </div>
             )}
 
-            {securityControls.length > 0 && (
+            {displayedSecurityControls.length > 0 && (
               <div>
-                <p class="text-muted-foreground mb-3 font-sans text-xs font-semibold tracking-[0.16em] uppercase">
-                  Security Controls
-                </p>
-
-                <div class="flex flex-wrap gap-2">
-                  {securityControls.map((control) => (
-                    <Badge variant="outline">{control}</Badge>
-                  ))}
-                </div>
+                <dt class="text-muted-foreground mb-2 font-sans text-xs font-semibold tracking-[0.16em] uppercase">
+                  {t.lab.securityFocus}
+                </dt>
+                <dd class="text-foreground/85 font-sans text-sm leading-relaxed">
+                  {displayedSecurityControls.join(" · ")}
+                </dd>
               </div>
             )}
-          </div>
+          </dl>
         )
       }
 
@@ -139,7 +143,7 @@ const iso = (date: Date): string => date.toISOString();
 
           {
             updatedDate && (
-              <span>
+              <span title={t.post.updatedNote}>
                 {t.post.updated}{" "}
                 <time datetime={iso(updatedDate)} class="text-foreground">
                   {formatDate(updatedDate, locale)}
@@ -147,6 +151,8 @@ const iso = (date: Date): string => date.toISOString();
               </span>
             )
           }
+
+          <span>{readingLabel}</span>
         </p>
       </div>
 
@@ -154,25 +160,33 @@ const iso = (date: Date): string => date.toISOString();
         (github || video) && (
           <div class="mt-6 flex flex-wrap gap-3">
             {github && (
-              <a
+              <Button
                 href={github}
+                reload
                 target="_blank"
                 rel="noopener noreferrer"
-                class="border-border hover:border-primary hover:text-primary rounded-card border px-4 py-2 font-sans text-sm font-semibold transition-colors"
+                variant="outline"
+                size="md"
               >
-                View on GitHub
-              </a>
+                {t.lab.viewGithub}
+                <Icon name="arrow-up-right" size={16} />
+                <span class="sr-only">({t.common.newTab})</span>
+              </Button>
             )}
 
             {video && (
-              <a
+              <Button
                 href={video}
+                reload
                 target="_blank"
                 rel="noopener noreferrer"
-                class="border-border hover:border-primary hover:text-primary rounded-card border px-4 py-2 font-sans text-sm font-semibold transition-colors"
+                variant="outline"
+                size="md"
               >
-                Watch video
-              </a>
+                {t.lab.watchVideo}
+                <Icon name="arrow-up-right" size={16} />
+                <span class="sr-only">({t.common.newTab})</span>
+              </Button>
             )}
           </div>
         )
@@ -181,7 +195,7 @@ const iso = (date: Date): string => date.toISOString();
       {
         draft && (
           <p class="border-border bg-muted text-muted-foreground rounded-card mt-6 border p-4 font-sans text-sm leading-relaxed">
-            {t.post.draftNote}
+            {t.lab.draftNote}
           </p>
         )
       }

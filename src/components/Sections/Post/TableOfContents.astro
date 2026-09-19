@@ -26,22 +26,34 @@ type Props = {
   headings: MarkdownHeading[];
   /** En dessous de ce nombre d'entrees, aucun sommaire n'est rendu. */
   min?: number;
+  /** Les Labs longs peuvent ne montrer que les sous-titres de la section active. */
+  desktopDisclosure?: "all" | "active-section";
   class?: string;
 };
 
-const { headings, min = 3, class: className } = Astro.props;
+const { headings, min = 3, desktopDisclosure = "all", class: className } = Astro.props;
 
 const locale = getLocale(Astro);
 const t = useTranslations(locale);
 
 // h2 et h3 seulement. Le h1 est le titre de la page, il n'est pas une etape ;
 // le h4 est un aparte, et un sommaire qui le liste cesse d'etre une carte.
-const items = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+let currentSection = "";
+const items = headings
+  .filter((heading) => heading.depth === 2 || heading.depth === 3)
+  .map((heading) => {
+    if (heading.depth === 2) currentSection = heading.slug;
+    return { ...heading, section: currentSection };
+  });
 ---
 
 {
   items.length >= min && (
-    <div class:list={["toc mb-8 xl:mb-0", className]} data-slot="toc">
+    <div
+      class:list={["toc mb-8 xl:mb-0", className]}
+      data-slot="toc"
+      data-toc-desktop-disclosure={desktopDisclosure}
+    >
       {/* Telephone et tablette : un <details> replie, en tete d'article. */}
       <details class="toc-box border-border bg-surface rounded-card border xl:hidden">
         <summary class="toc-summary font-display text-foreground text-sm font-semibold">
@@ -69,8 +81,16 @@ const items = headings.filter((heading) => heading.depth === 2 || heading.depth 
         </p>
         <ol class="toc-list">
           {items.map((item) => (
-            <li class:list={["toc-item", item.depth === 3 && "toc-item-sub"]}>
-              <a class="toc-link" href={`#${item.slug}`} data-toc-link={item.slug}>
+            <li
+              class:list={["toc-item", item.depth === 3 && "toc-item-sub"]}
+              data-toc-section={item.section}
+            >
+              <a
+                class="toc-link"
+                href={`#${item.slug}`}
+                data-toc-link={item.slug}
+                data-toc-section={item.section}
+              >
                 {item.text}
               </a>
             </li>
@@ -148,6 +168,10 @@ const items = headings.filter((heading) => heading.depth === 2 || heading.depth 
     font-size: 0.8rem;
   }
 
+  .toc-item[hidden] {
+    display: none;
+  }
+
   .toc-link:hover {
     color: var(--color-foreground);
     border-inline-start-color: color-mix(in oklab, var(--color-foreground) 35%, transparent);
@@ -187,6 +211,28 @@ const items = headings.filter((heading) => heading.depth === 2 || heading.depth 
       .filter((element): element is HTMLElement => element !== null);
     if (targets.length === 0) return;
 
+    const discloseActiveSection = root.dataset.tocDesktopDisclosure === "active-section";
+    const railSubItems = Array.from(
+      root.querySelectorAll<HTMLElement>(".toc-rail .toc-item-sub[data-toc-section]"),
+    );
+    const sectionByHeading = new Map<string, string>();
+    for (const link of root.querySelectorAll<HTMLAnchorElement>(".toc-rail [data-toc-link]")) {
+      const id = link.dataset.tocLink;
+      const section = link.dataset.tocSection;
+      if (id && section) sectionByHeading.set(id, section);
+    }
+
+    const revealSection = (section: string): void => {
+      if (!discloseActiveSection) return;
+      for (const item of railSubItems) item.hidden = item.dataset.tocSection !== section;
+    };
+
+    if (discloseActiveSection) {
+      const hashId = decodeURIComponent(location.hash.slice(1));
+      const initialId = sectionByHeading.has(hashId) ? hashId : targets[0]?.id;
+      if (initialId) revealSection(sectionByHeading.get(initialId) ?? initialId);
+    }
+
     // Les deux copies du sommaire (repliee et rail) portent le meme jeu de
     // liens : une seule boucle les tient d'accord.
     const light = (id: string): void => {
@@ -194,6 +240,7 @@ const items = headings.filter((heading) => heading.depth === 2 || heading.depth 
         if (link.dataset.tocLink === id) link.setAttribute("aria-current", "location");
         else link.removeAttribute("aria-current");
       }
+      revealSection(sectionByHeading.get(id) ?? id);
     };
 
     const observer = new IntersectionObserver(

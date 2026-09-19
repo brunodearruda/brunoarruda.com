@@ -1,0 +1,57 @@
+---
+// src/components/Sections/Labs/LabFooter.astro - navigation de fin de Lab avec retour a l'index et ressource externe facultative.
+import { Icon } from "@components/svg/icons";
+import { Button } from "@components/ui/button";
+import { getSiteRoutes } from "@config/navData.json.ts";
+import { getLocale, useTranslations } from "@i18n";
+import type { CollectionEntry } from "astro:content";
+
+type Props = {
+  lab: CollectionEntry<"labs">;
+  resourceHref?: string;
+  resourceLabel?: string;
+  class?: string;
+};
+
+const {
+  lab,
+  resourceHref = lab.data.github,
+  resourceLabel,
+  class: className,
+} = Astro.props;
+
+const locale = getLocale(Astro);
+const t = useTranslations(locale);
+const routes = getSiteRoutes(locale);
+const resolvedResourceLabel = resourceLabel ?? t.lab.viewRepository;
+---
+
+<footer class:list={["container-page pb-16 md:pb-24", className]} data-slot="lab-footer">
+  <nav
+    class="measure-prose border-border mx-auto flex flex-col gap-3 border-t pt-8 sm:flex-row sm:items-center sm:justify-between"
+    aria-label={t.lab.navLabel}
+  >
+    <Button href={routes.labs} variant="ghost" size="md" class="self-start">
+      <Icon name="arrow-left" size={17} />
+      {t.lab.backToLabs}
+    </Button>
+
+    {
+      resourceHref && (
+        <Button
+          href={resourceHref}
+          reload
+          target="_blank"
+          rel="noopener noreferrer"
+          variant="outline"
+          size="md"
+          class="self-start sm:self-auto"
+        >
+          {resolvedResourceLabel}
+          <Icon name="arrow-up-right" size={16} />
+          <span class="sr-only">({t.common.newTab})</span>
+        </Button>
+      )
+    }
+  </nav>
+</footer>

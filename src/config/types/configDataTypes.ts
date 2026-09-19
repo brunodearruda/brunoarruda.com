@@ -6,6 +6,7 @@ export interface SiteDataProps {
   description: string;
   useViewTransitions?: boolean;
   author: {
+    contentId: string;
     name: string;
     email: string;
     linkedin?: string;

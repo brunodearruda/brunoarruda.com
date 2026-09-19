@@ -3,6 +3,7 @@
 
 import Footer from "@components/Sections/Global/Footer.astro";
 import Navbar from "@components/Sections/Global/Navbar.astro";
+import LabFooter from "@components/Sections/Labs/LabFooter.astro";
 import LabHero from "@components/Sections/Labs/LabHero.astro";
 import PostBody from "@components/Sections/Post/PostBody.astro";
 import ReadingProgress from "@components/Sections/Post/ReadingProgress.astro";
@@ -11,14 +12,19 @@ import { getSiteRoutes } from "@config/navData.json.ts";
 import siteData from "@config/siteData.json";
 import { defaultLocale, getLocale, localizePath, useTranslations } from "@i18n";
 import { entryLocale, entrySlug } from "@i18n/content";
+import { selectMetadataImage } from "@js/metadata";
 import { article, breadcrumbList } from "@js/schema";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { getCollection, getEntry, render, type CollectionEntry } from "astro:content";
 
 export async function getStaticPaths() {
-  // Draft labs still receive their real local page for review, but remain
-  // excluded from public listings and are marked noindex.
-  const labs = await getCollection("labs");
+  // Les brouillons gardent leur vraie route dans le serveur de developpement,
+  // mais aucune route n'est emise en production : ils restent donc hors du
+  // sitemap construit a partir des pages generees.
+  const labs = await getCollection(
+    "labs",
+    ({ data }) => import.meta.env.DEV || data.draft !== true,
+  );
 
   return Promise.all(
     labs.map(async (lab) => {
@@ -60,27 +66,46 @@ const routes = getSiteRoutes(locale);
 
 const base = Astro.site ?? Astro.url;
 const url = new URL(`${routes.labs}${entrySlug(lab.id)}/`, base).href;
+const siteUrl = new URL("/", base).href;
+const personId = new URL("/#person", base).href;
+const isSiteAuthor = entrySlug(author.id) === siteData.author.contentId;
+const authorUrl = isSiteAuthor ? siteUrl : new URL(routes.about, base).href;
+const authorId = isSiteAuthor
+  ? personId
+  : new URL(`#person-${entrySlug(author.id)}`, authorUrl).href;
 
 const cover = lab.data.cover;
-const share = cover
-  ? { src: cover.src, alt: lab.data.coverAlt ?? lab.data.title }
-  : siteData.defaultImage;
+const socialImage = lab.data.socialImage;
+const share = selectMetadataImage({
+  social: socialImage
+    ? { src: socialImage.src, alt: lab.data.socialImageAlt ?? lab.data.title }
+    : undefined,
+  cover: cover ? { src: cover.src, alt: lab.data.coverAlt ?? lab.data.title } : undefined,
+  fallback: siteData.defaultImage,
+});
 
 const articleSchema = article({
+  type: "TechArticle",
   title: lab.data.title,
   description: lab.data.description,
   url,
   datePublished: lab.data.pubDate,
   dateModified: lab.data.updatedDate,
   image: new URL(share.src, base).href,
-  authorName: author.data.name,
-  authorUrl: new URL(routes.about, base).href,
-  publisherName: siteData.name,
+  author: {
+    id: authorId,
+    name: author.data.name,
+    url: authorUrl,
+    sameAs: author.data.links.map(({ href }) => href),
+    jobTitle: author.data.role,
+  },
+  publisherId: personId,
+  articleSection: topic.data.name,
 });
 
 const crumbSchema = breadcrumbList([
   { name: t.common.home, url: new URL(localizePath("/", locale), base).href },
-  { name: "Labs", url: new URL(routes.labs, base).href },
+  { name: t.labs.breadcrumb, url: new URL(routes.labs, base).href },
   { name: lab.data.title, url },
 ]);
 ---
@@ -105,20 +130,11 @@ const crumbSchema = breadcrumbList([
       <LabHero {lab} {author} {topic} />
 
       <PostBody>
-        <TableOfContents slot="toc" {headings} />
+        <TableOfContents slot="toc" {headings} desktopDisclosure="active-section" />
         <Content />
       </PostBody>
 
-      <div class="container-page pb-16 md:pb-24">
-        <div class="measure-prose mx-auto border-t border-border pt-8">
-          <a
-            href={routes.labs}
-            class="text-foreground decoration-primary/50 font-sans text-sm font-semibold underline-offset-4 hover:underline"
-          >
-            ← Back to Labs
-          </a>
-        </div>
-      </div>
+      <LabFooter {lab} />
     </article>
   </main>
 

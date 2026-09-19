@@ -1,0 +1,398 @@
+---
+title: Building and Securing a Production Static Website on AWS
+description: Hands-on AWS cloud security case study using CloudFront, private S3 with OAC, DNSSEC, CSP, monitoring, and keyless GitHub OIDC deployment.
+pubDate: 2026-09-19
+author: en/bruno-arruda
+topic: en/secure-architecture
+tags: [AWS, Cloud Security, DevSecOps, Secure Architecture, GitHub OIDC]
+awsServices: [Amazon Route 53, Amazon CloudFront, Amazon S3, AWS Certificate Manager, AWS WAF, Amazon CloudWatch, Amazon SNS, AWS CloudTrail, AWS Identity and Access Management, AWS Security Token Service]
+heroServices: [Route 53, CloudFront, S3, WAF, CloudWatch, IAM]
+securityControls: [Private origin, Origin Access Control, DNSSEC, TLS, Content Security Policy, Security headers, Web application firewall, Monitoring and alerting, Audit logging, Federated identity, Least privilege]
+heroSecurityControls: [Private Origin, DNSSEC, CSP, Monitoring, OIDC, Least Privilege]
+socialImage: ../../../assets/labs/building-securing-static-website-aws/social-card.png
+socialImageAlt: "Building and Securing a Production Static Website on AWS \u2014 cloud security case study by Bruno Arruda."
+github: https://github.com/brunodearruda/brunoarruda.com
+featured: true
+draft: true
+---
+
+import LabAside from "@components/Sections/Labs/LabAside.astro";
+import LabDataTable from "@components/Sections/Labs/LabDataTable.astro";
+import LabFigure from "@components/Sections/Labs/LabFigure.astro";
+import architecture from "@assets/labs/building-securing-static-website-aws/architecture.png";
+import cloudwatchAlarm from "@assets/labs/building-securing-static-website-aws/cloudwatch-4xx-alarm.png";
+
+## Overview
+I built this website as more than a place to publish technical content. I also wanted to use the infrastructure behind it as a practical cloud security project.
+
+The application is a static website built with Astro, but the security requirements go beyond uploading static files to an S3 bucket. The objective was to design a production-oriented AWS architecture that keeps the origin private, serves content securely through the edge, and protects DNS and web traffic. It also provides monitoring and auditability and supports automated deployments without storing long-lived AWS credentials in GitHub.
+
+The final solution uses Amazon Route 53, CloudFront, S3, ACM, AWS WAF, CloudWatch, SNS, CloudTrail, IAM, STS and GitHub Actions. More importantly, this Lab records why each security decision was made, how the control was validated, and which trade-offs were accepted.
+
+> Problem → Threat → Decision → Implementation → Validation → Trade-off
+
+This reasoning model appears once because it guides the case study. It is not a set of labels to repeat around every section.
+
+## Security Requirements
+The requirements became the basis of the architecture. Security was not added as a final deployment step.
+
+| Objective | Required outcome |
+| --- | --- |
+| Origin protection | Keep the S3 origin private |
+| Controlled origin access | Allow CloudFront to reach S3 through OAC |
+| Transport security | Redirect HTTP to HTTPS |
+| Modern TLS | Serve a valid ACM certificate through CloudFront |
+| DNS integrity | Sign the Route 53 hosted zone with DNSSEC |
+| Browser security | Apply CSP and other response headers |
+| Web protection without premature blocking | Observe requests with AWS WAF before enforcement |
+| Detection | Monitor CloudFront 4xx and 5xx rates |
+| Alerting | Deliver alarm notifications through SNS |
+| Auditability | Record AWS management events with CloudTrail |
+| No long-lived GitHub AWS credentials | Use GitHub OIDC and AWS STS |
+| Least-privilege deployment | Limit the deployment role to required actions |
+| CSP deployment safety | Validate the approved inline-script hash in CI |
+| Cost awareness | Keep AWS Budgets monitoring active |
+
+## Threat Model
+A static website has a relatively small application attack surface. This project therefore focuses mainly on infrastructure, browser controls, operational visibility, and the deployment path.
+
+| Threat or failure mode | Control |
+| --- | --- |
+| Direct access to the storage origin | Private S3 and OAC |
+| Accidental public bucket exposure | S3 Block Public Access |
+| Traffic interception or downgrade | HTTPS, ACM and CloudFront |
+| DNS manipulation | Route 53 and DNSSEC |
+| Script injection impact | Restrictive CSP |
+| Clickjacking | `frame-ancestors` and `X-Frame-Options` |
+| MIME-type confusion | `X-Content-Type-Options` |
+| Browser capability abuse | `Permissions-Policy` |
+| Suspicious web requests | AWS WAF |
+| HTTP errors | CloudWatch |
+| Missed operational events | SNS |
+| Unauthorized AWS management changes | CloudTrail |
+| Compromised long-lived CI credentials | GitHub OIDC and STS |
+| Excessive deployment permissions | Least-privilege IAM role |
+| CSP regression | SHA-256 validation in CI |
+| Unexpected spending | AWS Budgets |
+
+The threat model helps prevent unnecessary complexity. A control should address a relevant risk or operational requirement.
+
+## Architecture
+The design separates public content delivery from deployment identity.
+
+**Public delivery:** Internet → Route 53 with DNSSEC → CloudFront → OAC → private S3
+
+**Deployment identity:** GitHub Actions → GitHub OIDC → AWS STS → least-privilege IAM role → S3 deployment and CloudFront invalidation
+
+CloudWatch and SNS provide operational monitoring. CloudTrail records management events, while AWS Budgets provides cost awareness.
+
+<LabFigure src={architecture}
+  alt="AWS security architecture showing Route 53 with DNSSEC, CloudFront with TLS, WAF and security headers, Origin Access Control to a private S3 bucket, CloudWatch and CloudTrail monitoring, and GitHub Actions deployment through OIDC, STS and a least-privilege IAM role."
+  caption="Figure 1. Final security architecture for brunoarruda.com, including the public delivery path, private S3 origin, monitoring controls, and keyless GitHub OIDC deployment flow." />
+
+The main trust boundaries are the public edge, the private storage origin, and the temporary deployment session. CloudFront accepts public requests, OAC controls origin access, and STS issues short-lived credentials only after the GitHub identity satisfies the role trust policy.
+
+Three principles guided the architecture:
+
+1. **Private by default.** Storage does not become public just because the website is public.
+2. **Temporary identity over stored credentials.** The deployment obtains a short-lived session when it needs one.
+3. **Validate controls, not configurations.** A configured control is tested through the behavior it should produce.
+
+## Building the Security Architecture
+### Private Origin: S3, CloudFront and OAC
+The website must be public, but its storage origin does not need to be public.
+
+<LabAside type="threat">
+  A public S3 origin would create a path around CloudFront controls. Direct access could bypass the edge policy, headers, monitoring assumptions, and canonical routing.
+</LabAside>
+
+The decision was to make CloudFront the only public entry point. S3 Block Public Access is enabled, static website hosting is disabled, ACLs are disabled through Bucket owner enforced, versioning is enabled, and objects use SSE-S3. CloudFront uses the S3 REST origin with Origin Access Control.
+
+The bucket policy is restricted to the CloudFront distribution. This focused example shows the relationship without exposing account details:
+
+```json
+{
+  "Effect": "Allow",
+  "Principal": { "Service": "cloudfront.amazonaws.com" },
+  "Action": "s3:GetObject",
+  "Resource": "arn:aws:s3:::<BUCKET_NAME>/*",
+  "Condition": { "StringEquals": {
+    "AWS:SourceArn": "arn:aws:cloudfront::<AWS_ACCOUNT_ID>:distribution/<DISTRIBUTION_ID>"
+  } }
+}
+```
+
+Direct origin access was tested with:
+
+```sh
+curl -I https://s3.eu-west-1.amazonaws.com/<BUCKET_NAME>/index.html
+```
+
+The observed result was `HTTP/1.1 403 Forbidden`, while CloudFront continued to serve the website successfully. **PASS:** the tested direct origin path was not public. CloudFront is public. The origin remains private.
+
+The S3 website endpoint is not used. Directory-style routing is therefore handled at the edge.
+
+### DNS and Transport Security
+The request path is: User → DNS resolution with DNSSEC → CloudFront → TLS with ACM → website.
+
+Route 53 provides authoritative DNS and signs the hosted zone with the configured key-signing key, which is backed by AWS KMS. A DS record in the parent zone completes the DNSSEC chain of trust. The ACM viewer certificate for the apex and `www` names is in `us-east-1`, and CloudFront redirects HTTP to HTTPS. Route 53 resolves the `www` hostname to CloudFront; the existing CloudFront Function performs the HTTP redirect to the apex domain. Existing email records and existing subdomain behavior were preserved during the DNS migration.
+
+DNSSEC validation used a public validating resolver:
+
+```sh
+dig @1.1.1.1 brunoarruda.com A +dnssec
+```
+
+The response included the authenticated-data `ad` flag, showing that this validating resolver authenticated that response. It does not mean DNS is universally immune to spoofing or misconfiguration. An HTTP request also confirmed the transport redirect:
+
+```sh
+curl -I http://brunoarruda.com/
+```
+
+The request redirected to HTTPS, and the external TLS assessment received grade A.
+
+HSTS intentionally does not use `includeSubDomains` because enabling HSTS for all subdomains would break an existing HTTP-dependent subdomain.
+
+### Edge and Browser Security
+HTTPS protects data in transit, but it does not control how a browser executes scripts, embeds pages, interprets content types, or exposes optional capabilities.
+
+The response policy combines AWS Managed SecurityHeadersPolicy with a CloudFront viewer-response function. Together they provide `X-Frame-Options`, `Referrer-Policy`, `X-Content-Type-Options`, HSTS, Content Security Policy, and `Permissions-Policy`.
+
+The initial CSP allowed `script-src 'self' 'unsafe-inline'`. The Astro production build was then inspected. The generated home page contained one required executable inline script, used for theme initialization. That understood script was authorized with a SHA-256 hash:
+
+```text
+script-src 'self' 'sha256-<APPROVED_HASH>'
+```
+
+The policy still allows `style-src 'unsafe-inline'` because the current site has legitimate inline-style requirements. This is a documented scope choice, not a claim that inline styles are ideal in every application.
+
+Validation covered the theme toggle, theme persistence, search, navigation, hard refresh, and the browser console. No functional CSP errors were observed. The external SecurityHeaders assessment improved from F to A+.
+
+<LabAside type="tradeoff">
+  The custom 404 response receives the managed headers, but it does not receive the function-added CSP and Permissions-Policy in exactly the same way as normal responses. Adding Lambda@Edge only for this limited case was not justified.
+</LabAside>
+
+### Web Protection with AWS WAF
+The public edge needs visibility into suspicious requests. AWS WAF was therefore introduced in monitor mode before enforcement.
+
+<LabAside type="decision">
+  The operating model is Observe → Baseline → Investigate → Tune → Enforce when justified. Early visibility is useful, but blocking rules need evidence and tuning.
+</LabAside>
+
+Traffic spikes were visible, but the available telemetry did not provide enough evidence to classify them as malicious. An unusual traffic pattern is an investigation signal, not automatically evidence of malicious activity.
+
+Monitor mode does not automatically block requests. This is a deliberate baseline strategy for the current stage.
+
+## Detection, Monitoring and Auditability
+### CloudWatch and SNS
+CloudWatch monitors error rates so operational failures become visible. The 4xx alarm uses the Average statistic over 5-minute periods, a threshold above 20%, three of three evaluation periods, and missing data treated as not breaching. The 5xx alarm uses Average over 5-minute periods, a threshold above 5%, two of two evaluation periods, and the same missing-data treatment.
+
+SNS delivers email notifications without publishing the recipient address. A real 4xx alarm occurred and a real SNS notification was received, validating this chain:
+
+> CloudFront → CloudWatch metric → alarm threshold → alarm state → SNS → notification
+
+<LabFigure src={cloudwatchAlarm}
+  alt="AWS CloudWatch 4xxErrorRate alarm showing production traffic exceeding the configured 20 percent threshold, alarm state transitions, and successful SNS notification actions." caption="Figure 2. CloudWatch 4xx monitoring in production. The alarm entered the ALARM state after the configured threshold was exceeded and executed the SNS notification action before returning to OK." />
+
+WAF telemetry did not provide enough evidence to classify the event as an attack. Detection should trigger investigation, not automatically determine the cause.
+
+Percentage alarms can be noisy on low-traffic websites. Their thresholds should be tuned with production data.
+
+### CloudTrail
+CloudTrail answers a different question: **What management activity occurred in the AWS account?**
+
+The implementation uses a multi-region trail, management read and write events, log-file validation, S3 log delivery, and a 180-day S3 lifecycle expiration window. Management-event log delivery to S3 was confirmed. CloudTrail log-file validation is enabled, allowing delivered log files to be checked for integrity using digest files; this Lab does not claim that an integrity-validation operation such as `validate-logs` was executed.
+
+This Lab does not claim to collect every possible event. S3 data events, CloudTrail Insights, CloudWatch Logs integration, and an additional customer-managed KMS layer for CloudTrail logs are not enabled because they were outside the current requirement.
+
+### AWS Budgets
+Cost awareness is an operational control. Existing monthly budget monitoring was already active and healthy, without publishing unnecessary account-specific values.
+
+The budgets are account-wide rather than dedicated only to this website. That coverage is sufficient for the current scale.
+
+## Secure CI/CD with GitHub OIDC
+### OIDC and Temporary AWS Credentials
+Permanent AWS access keys stored in GitHub can be exposed, reused, or granted more access than a deployment needs.
+
+<LabAside type="decision">
+  GitHub OIDC and AWS STS replace stored AWS keys. GitHub presents a signed identity token, and STS returns temporary credentials only when the verified claims match the IAM trust policy.
+</LabAside>
+
+The flow is GitHub Actions → OIDC token → AWS IAM OIDC provider → AWS STS → dedicated deployment role → temporary credentials. The expected audience is `sts.amazonaws.com`.
+
+The trust relationship is restricted to the approved repository identity and the `main` branch. The subject format observed for this repository and account configuration is represented with sanitized placeholders here:
+
+```json
+{
+  "Effect": "Allow",
+  "Principal": {
+    "Federated": "arn:aws:iam::<AWS_ACCOUNT_ID>:oidc-provider/token.actions.githubusercontent.com"
+  },
+  "Action": "sts:AssumeRoleWithWebIdentity",
+  "Condition": { "StringEquals": {
+    "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+    "token.actions.githubusercontent.com:sub": "repo:brunodearruda@<OWNER_ID>/brunoarruda.com@<REPOSITORY_ID>:ref:refs/heads/main"
+  } }
+}
+```
+
+### Least-Privilege Deployment Role
+The deployment role does not use `AdministratorAccess`, `AmazonS3FullAccess`, or broad CloudFront permissions. At bucket level it can call `s3:ListBucket` and `s3:GetBucketLocation`. At object level it can call `s3:PutObject` and `s3:DeleteObject`. For CloudFront, it can call only `cloudfront:CreateInvalidation` against the required resources, represented with `<BUCKET_NAME>`, `<DISTRIBUTION_ID>`, and `<AWS_ACCOUNT_ID>` placeholders.
+
+The workflow itself requests only the permissions it needs:
+
+```yaml
+permissions:
+  contents: read
+  id-token: write
+```
+
+`id-token: write` allows the workflow to request an OIDC token. It does not itself grant AWS permissions. A normal push to `main` successfully completed the build, OIDC authentication, S3 upload, and CloudFront invalidation.
+
+### Troubleshooting the OIDC Trust Relationship
+The first attempt failed with:
+
+```text
+Could not assume role with OIDC:
+Not authorized to perform sts:AssumeRoleWithWebIdentity
+```
+
+The original trust relationship expected a different GitHub subject format. The actual token used the repository- and account-specific subject represented in sanitized form above. The claims were inspected without printing the token itself.
+
+The trust policy was not broadened with a permissive wildcard. It was updated to the exact expected audience and subject for the `main` branch. The rerun succeeded, followed by a successful normal production push.
+
+Exact identity trust may require an intentional update if the repository identity or deployment model changes. The practical lesson is to inspect the actual claims safely before defining trust conditions, not to make authentication succeed with a broad wildcard.
+
+## Security Guardrails in CI
+### CSP Hash Validation
+The production CSP depends on the generated theme initialization script. A legitimate code change could modify that script and make the approved CSP hash invalid.
+
+After building the site, the workflow reads `dist/index.html`, identifies the executable inline script on that page, requires exactly one, calculates its SHA-256 hash, and compares it with the approved value. A mismatch fails the job before AWS authentication.
+
+This CI check detects unnoticed drift in the shared theme initialization script represented on the generated home page. It does not independently inspect every generated page, verify the deployed CSP or browser enforcement, or prove the overall website is secure.
+
+This focused excerpt uses a placeholder to keep the example readable and to discourage copying a hash that must be generated and validated against the actual built inline script:
+
+```yaml
+- name: Verify CSP inline script hash
+  run: |
+    EXPECTED_HASH="<APPROVED_HASH>"
+    ACTUAL_HASH="$(calculate_reviewed_inline_script_hash)"
+
+    if [ "$ACTUAL_HASH" != "$EXPECTED_HASH" ]; then
+      echo "::error::Inline script changed. Review the CSP before deploying."
+      exit 1
+    fi
+```
+
+The generated hash matched the approved value and the pipeline passed. A change to that home-page script now blocks deployment until the script is reviewed and the approved CSP value is updated.
+
+### Deployment Cache Strategy
+Astro assets under `_astro` receive:
+
+```text
+public,max-age=31536000,immutable
+```
+
+Other site content receives:
+
+```text
+public,max-age=0,must-revalidate
+```
+
+Hashed assets can be cached aggressively because a content change produces a new filename. HTML and other content should revalidate so visitors receive current page references. A CloudFront invalidation runs after deployment.
+
+## Security Validation
+<LabDataTable caption="Security control validation results" columns={["Control", "Test", "Observed result", "Status"]}
+  rows={[
+    ["Private S3 origin", "Direct S3 request", "403 Forbidden", "PASS"],
+    ["CloudFront delivery", "Public website", "Available through CloudFront", "PASS"],
+    ["HTTP to HTTPS", "HTTP request", "Redirect to HTTPS", "PASS"],
+    ["TLS", "External TLS assessment", "Grade A", "PASS"],
+    ["DNSSEC", "Validating DNS query", "AD flag", "PASS"],
+    ["Security headers", "External header assessment", "A+", "PASS"],
+    ["CSP compatibility", "Expected browser functionality and console", "Expected functionality continued; no relevant CSP console errors observed", "PASS"],
+    ["www redirect", "www request", "Canonical apex redirect", "PASS"],
+    ["Query preservation", "Redirected URL with query string", "Query preserved", "PASS"],
+    ["Custom 404", "Nonexistent route", "HTTP 404", "PASS"],
+    ["WAF visibility", "Production traffic observation", "Requests visible", "PASS"],
+    ["CloudWatch 4xx", "Real threshold event", "Alarm triggered", "PASS"],
+    ["SNS", "Real alarm delivery", "Notification received", "PASS"],
+    ["CloudTrail", "Management-event logging", "Delivery confirmed", "PASS"],
+    ["GitHub OIDC", "STS role assumption", "Temporary AWS authentication succeeded", "PASS"],
+    ["Deployment permission sufficiency", "Normal main deployment", "Scoped role completed required deployment actions", "PASS"],
+    ["CSP CI guard", "Build-time hash validation", "Approved hash matched", "PASS"],
+  ]} mobileLayout="compact" mobileColumns={[0, 2]} statusColumn={3} />
+
+PASS does not mean "secure against everything." It means the tested property behaved as expected during this validation.
+
+For example, a 403 response from the tested direct S3 path proves that the tested origin path was not publicly accessible at that time. It does not guarantee that every possible future S3 misconfiguration can never occur.
+
+## What Failed and What I Learned
+### DNS Migration and Local Resolver Cache
+After migration to Route 53, authoritative DNS was correct, but one local network continued returning stale information. Some clients worked while another local path did not.
+
+Authoritative nameservers and external resolvers were checked before changing AWS. Changing the local network resolved the problem. The useful investigation order was registrar delegation → authoritative DNS → recursive resolver → local cache → application or browser. A failure on one client does not automatically mean authoritative DNS is wrong.
+
+### CSP: Functionality vs. Security
+The initial policy used `script-src 'self' 'unsafe-inline'`. Instead of accepting that setting permanently, the build was inspected. One required executable inline script was identified, its purpose was understood, and it was authorized by SHA-256.
+
+The lesson was to observe → identify → understand → authorize → retest.
+
+### A Real 4xx Alarm Did Not Automatically Mean an Attack
+The alarm and SNS notification worked, and traffic had increased. However, available WAF telemetry did not provide enough evidence to call the event malicious.
+
+**Alert ≠ confirmed incident.** Percentage-based alarms also become sensitive when a low-traffic site receives only a small number of requests.
+
+### CloudFront Custom Error Response Limitation
+Normal responses receive both managed headers and function-added CSP and Permissions-Policy headers. The custom 404 path does not receive the function-added headers in exactly the same way.
+
+The limitation was documented instead of adding Lambda@Edge only for this case. The decision considered risk + likelihood + impact + operational complexity + cost.
+
+### GitHub OIDC Trust Policy Mismatch
+The detailed CI/CD section records the incident. The lasting lesson is to inspect actual identity claims before defining exact trust conditions, not to weaken trust with broad wildcards merely to make authentication succeed.
+
+## Trade-offs and Accepted Risks
+<LabDataTable caption="Accepted security trade-offs and reasons" columns={["Decision", "Accepted limitation", "Reason"]} rows={[
+    ["WAF monitor mode", "Suspicious requests are not automatically blocked", "Establish a baseline before enforcement"],
+    ["HSTS without includeSubDomains", "HSTS does not cover every subdomain", "Preserve an existing HTTP-dependent subdomain"],
+    ["style-src 'unsafe-inline'", "Inline CSS remains permitted", "Support current legitimate style requirements"],
+    ["Custom 404", "Not all function-added headers are present", "Lambda@Edge complexity is not justified"],
+    ["CloudTrail management events only", "No S3 data-event audit trail", "Current requirement focuses on control-plane changes"],
+    ["No additional CloudTrail KMS layer", "No customer-managed key for these logs", "Additional key management is not required for this scope"],
+    ["No GuardDuty, Security Hub, or AWS Config", "Less automated security visibility", "Not justified by the current environment and operational scope"],
+    ["Percentage-based alarms", "Possible noise at low traffic", "Baseline and future tuning are required"],
+  ]} mobileLayout="stacked" />
+
+An accepted risk is a documented decision, not an ignored risk.
+
+## Final Architecture and Lessons Learned
+The final model has three connected paths:
+
+- **Public:** Internet → Route 53 and DNSSEC → CloudFront with TLS, WAF, headers, and CSP → OAC → private S3.
+- **Deployment:** GitHub → Actions → OIDC → STS → least-privilege IAM role → S3 and CloudFront invalidation.
+- **Operations:** CloudWatch → SNS, supported by CloudTrail and AWS Budgets.
+
+**Private by default.** A public website does not require a public storage origin.
+
+**Identity is better than stored credentials.** OIDC and STS remove the need for permanent AWS deployment keys in GitHub.
+
+**Configuration is not validation.** S3 privacy was checked with a direct request, DNSSEC with a validating resolver, HTTPS with a redirect test, CSP through browser behavior, CloudWatch and SNS through a real notification, and OIDC through a real deployment.
+
+**Monitoring requires investigation.** Observability provides evidence; analysis provides context.
+
+**Security belongs in the delivery process.** The CSP guard moves one security assumption into CI.
+
+**More security services do not automatically mean better security.** Each control adds cost and operational work as well as protection.
+
+> “What risk does this control address, and is that risk sufficient to justify its cost and operational complexity?”
+
+## Conclusion
+The main technical takeaway is that controls become useful when their purpose, behavior, and limitations are understood and tested. For this site, secure delivery became part of the architecture and deployment process, with evidence and accepted trade-offs documented alongside the implementation.
+
+## Resources and Implementation
+The public [website repository](https://github.com/brunodearruda/brunoarruda.com) contains the source and the deployment workflow at [`.github/workflows/deploy.yml`](https://github.com/brunodearruda/brunoarruda.com/blob/main/.github/workflows/deploy.yml).
+
+The workflow demonstrates build → validation → CSP integrity check → GitHub OIDC authentication → S3 deployment → CloudFront invalidation.
+
+The repository does not claim that the complete AWS environment is Infrastructure as Code. It contains the website source and deployment workflow, while some AWS infrastructure configuration was performed directly in AWS.

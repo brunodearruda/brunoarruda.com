@@ -38,6 +38,34 @@ export function organization(input: OrganizationInput): JsonLdNode {
   });
 }
 
+export interface PersonInput {
+  id: string;
+  name: string;
+  url: string;
+  sameAs?: string[];
+  jobTitle?: string;
+}
+
+/** Les proprietes partagees par le noeud Person racine et ses usages imbriques. */
+function personProperties(input: PersonInput): Record<string, unknown> {
+  return compact({
+    "@type": "Person",
+    "@id": input.id,
+    name: input.name,
+    url: input.url,
+    sameAs: input.sameAs,
+    jobTitle: input.jobTitle,
+  });
+}
+
+/** L'identite Person canonique du site, reliee partout par le meme @id. */
+export function person(input: PersonInput): JsonLdNode {
+  return {
+    "@context": CONTEXT,
+    ...personProperties(input),
+  } as JsonLdNode;
+}
+
 export interface WebsiteInput {
   name: string;
   url: string;
@@ -56,23 +84,23 @@ export function website(input: WebsiteInput): JsonLdNode {
 }
 
 export interface ArticleInput {
+  type?: "Article" | "TechArticle";
   title: string;
   description: string;
   url: string;
   datePublished: Date | string;
   dateModified?: Date | string;
   image?: string;
-  authorName: string;
-  authorUrl?: string;
-  publisherName?: string;
-  publisherLogo?: string;
+  author: PersonInput;
+  publisherId?: string;
+  articleSection?: string;
 }
 
-/** Le noeud Article d'un billet de blog. Les noeuds imbriques (Person, Organization) n'ont pas de @context. */
+/** Un Article de blog ou TechArticle de Lab, relie a une identite Person stable. */
 export function article(input: ArticleInput): JsonLdNode {
   return compact({
     "@context": CONTEXT,
-    "@type": "Article",
+    "@type": input.type ?? "Article",
     headline: input.title,
     description: input.description,
     url: input.url,
@@ -80,19 +108,9 @@ export function article(input: ArticleInput): JsonLdNode {
     datePublished: isoDate(input.datePublished),
     dateModified: input.dateModified === undefined ? undefined : isoDate(input.dateModified),
     image: input.image,
-    author: compact({
-      "@type": "Person",
-      name: input.authorName,
-      url: input.authorUrl,
-    }),
-    publisher:
-      input.publisherName === undefined
-        ? undefined
-        : compact({
-            "@type": "Organization",
-            name: input.publisherName,
-            logo: input.publisherLogo,
-          }),
+    author: personProperties(input.author),
+    publisher: input.publisherId === undefined ? undefined : { "@id": input.publisherId },
+    articleSection: input.articleSection,
   });
 }
 

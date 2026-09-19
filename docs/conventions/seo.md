@@ -25,9 +25,9 @@ missing, add it there, readable and diffable. BaseLayout passes its
 ## JSON-LD: constructors only
 
 Structured data is built exclusively with the typed constructors in
-src/js/schema.ts (`organization` :30, `website` :48, `article` :72,
-`faqPage` :105, `breadcrumbList` :126, `softwareApplication` :154) and
-injected through the head slot:
+src/js/schema.ts. The site identity is a canonical `Person`; `article`
+defaults to `Article` for Blog posts and accepts `TechArticle` explicitly for
+Labs. Pages inject the resulting nodes through the head slot:
 
 ```astro
 <Fragment slot="head">
@@ -45,10 +45,10 @@ behavior is pinned by src/js/schema.selfcheck.ts
 
 Placement map:
 
-- Home: organization + website (index.astro). Organization appears once on the
-  site, here. A blog home is not a sales page; it declares nothing it does not
-  show.
-- Blog post: article + breadcrumbList (blog/[id].astro).
+- Home: person + website (index.astro).
+- About: the same person `@id` + breadcrumbList.
+- Blog post: Article + breadcrumbList (blog/[id].astro).
+- Lab: TechArticle + breadcrumbList (labs/[id].astro).
 - Topic and author archives: breadcrumbList.
 - `faqPage` and `softwareApplication` exist in the constructors and are unused
   here. Leave them: a user who adds a pricing page should not have to write
@@ -76,3 +76,6 @@ sitemap too; keep them in step.
   card via the `image` prop; alt text is mandatory in that prop's shape.
 - `noindex` is a prop, not a habit (BaseHead.astro:84): draft posts and
   utility pages use it; everything else stays indexable.
+- A Lab may set `socialImage` plus `socialImageAlt` without rendering that
+  image as its visible cover. Metadata chooses social image, then cover, then
+  the global default. The pure selection rule lives in src/js/metadata.ts.

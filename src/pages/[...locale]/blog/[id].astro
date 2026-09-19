@@ -71,6 +71,13 @@ const routes = getSiteRoutes(locale);
 // blog servi sous /journal/ ne demande pas de rouvrir cette page.
 const base = Astro.site ?? Astro.url;
 const url = new URL(`${routes.posts}${entrySlug(post.id)}/`, base).href;
+const siteUrl = new URL("/", base).href;
+const personId = new URL("/#person", base).href;
+const isSiteAuthor = entrySlug(author.id) === siteData.author.contentId;
+const authorUrl = isSiteAuthor ? siteUrl : new URL(routes.about, base).href;
+const authorId = isSiteAuthor
+  ? personId
+  : new URL(`#person-${entrySlug(author.id)}`, authorUrl).href;
 
 // La couverture sert de carte de partage quand elle existe ; sinon l'image par
 // defaut du site. Les deux sont absolues, ce qu'exigent OG et schema.org.
@@ -86,9 +93,14 @@ const articleSchema = article({
   datePublished: post.data.pubDate,
   dateModified: post.data.updatedDate,
   image: new URL(share.src, base).href,
-  authorName: author.data.name,
-  authorUrl: new URL(routes.about, base).href,
-  publisherName: siteData.name,
+  author: {
+    id: authorId,
+    name: author.data.name,
+    url: authorUrl,
+    sameAs: author.data.links.map(({ href }) => href),
+    jobTitle: author.data.role,
+  },
+  publisherId: personId,
 });
 
 const crumbSchema = breadcrumbList([

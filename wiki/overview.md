@@ -12,7 +12,7 @@ sources:
   - src/i18n/index.ts
   - package.json
   - tsconfig.json
-updated: 2026-08-15
+updated: 2026-09-19
 ---
 
 # Architecture overview
@@ -62,8 +62,7 @@ src/pages/[...locale]/index.astro is the reference:
   only, silently.
 - It reads its copy from the dictionary (`useTranslations(locale)`), never
   from a literal, and computes its JSON-LD nodes with the constructors from
-  @js/schema: Organization and WebSite. A blog home is not a sales page, so it
-  declares nothing it does not show.
+  @js/schema: the canonical site Person and WebSite.
 - It renders BaseLayout with a title and description taken from the
   dictionary, injecting the JSON-LD through `<Fragment slot="head">`.
 - BaseLayout renders the single `<html>`, with `lang` and `dir` from the
@@ -80,6 +79,10 @@ A post (blog/[id].astro) multiplies `getStaticPaths` by the posts collection:
 one page per post AND per language, both under the same slug, which is what
 lets the language switcher land on the translation of the post being read. It
 carries an Article node plus breadcrumbList.
+
+A Lab follows the same reading layout but remains a separate collection. Its
+detail route emits TechArticle plus breadcrumbList, and metadata chooses an
+optional social image before its visible cover and the global default.
 
 ## What the build emits
 

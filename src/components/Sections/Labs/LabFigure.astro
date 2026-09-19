@@ -1,0 +1,40 @@
+---
+// src/components/Sections/Labs/LabFigure.astro - figure accessible et responsive pour les schemas d'architecture et les preuves d'un Lab.
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
+type Props = {
+  src: ImageMetadata;
+  alt: string;
+  caption: string;
+  wide?: boolean;
+  class?: string;
+};
+
+const { src, alt, caption, wide = false, class: className } = Astro.props;
+
+if (alt.trim().length === 0) {
+  throw new Error("LabFigure exige un texte alternatif non vide");
+}
+
+const widths = src.format === "svg" ? undefined : [720, 1080, 1440];
+const sizes = wide
+  ? "(min-width: 80rem) 82ch, calc(100vw - 2.5rem)"
+  : "(min-width: 48rem) 68ch, calc(100vw - 2.5rem)";
+---
+
+<figure
+  class:list={[wide && "prose-wide", className]}
+  data-slot="lab-figure"
+>
+  <Image
+    {src}
+    {alt}
+    {widths}
+    sizes={widths ? sizes : undefined}
+    class="border-border h-auto w-full rounded-card border"
+    loading="lazy"
+    decoding="async"
+  />
+  <figcaption>{caption}</figcaption>
+</figure>

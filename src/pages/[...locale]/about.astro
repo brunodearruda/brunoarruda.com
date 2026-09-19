@@ -9,8 +9,9 @@ import { Button } from "@components/ui/button";
 import { getSiteRoutes } from "@config/navData.json.ts";
 import siteData from "@config/siteData.json";
 import { getLocale, localePaths, localizePath, useTranslations } from "@i18n";
-import { breadcrumbList, organization } from "@js/schema";
+import { breadcrumbList, person } from "@js/schema";
 import BaseLayout from "@layouts/BaseLayout.astro";
+import { getEntry } from "astro:content";
 
 export const getStaticPaths = localePaths;
 
@@ -23,13 +24,17 @@ const description = t.about.metaDescription;
 
 const base = Astro.site ?? Astro.url;
 const siteUrl = new URL(localizePath("/", locale), base).href;
+const siteAuthor = await getEntry("authors", `${locale}/${siteData.author.contentId}`);
+if (!siteAuthor) {
+  throw new Error(`Unknown site author "${siteData.author.contentId}" for locale "${locale}"`);
+}
 const schemas = [
-  organization({
-    name: siteData.name,
-    url: siteUrl,
-    sameAs: [siteData.author.linkedin, siteData.author.github].filter(
-      (url): url is string => Boolean(url),
-    ),
+  person({
+    id: new URL("/#person", base).href,
+    name: siteAuthor.data.name,
+    url: new URL("/", base).href,
+    sameAs: siteAuthor.data.links.map(({ href }) => href),
+    jobTitle: siteAuthor.data.role,
   }),
   breadcrumbList([
     { name: t.common.home, url: siteUrl },

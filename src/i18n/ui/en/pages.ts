@@ -183,6 +183,28 @@ backgroundYearsLede: "working across technology infrastructure and security.",
   githubCta: "View GitHub",
 },
 
+  // --- Labs ----------------------------------------------------------------
+  labs: {
+    metaTitle: "AWS Cloud Security Labs | Bruno Arruda",
+    metaDescription:
+      "Hands-on AWS cloud security labs covering architecture, implementation, validation, security controls, and real-world technical scenarios.",
+    eyebrow: "LABS",
+    breadcrumb: "Labs",
+    title: "Cloud security, built in practice",
+    accent: "practice",
+    lede:
+      "Hands-on AWS cloud security projects built around real-world scenarios, architecture decisions, implementation, validation, and security controls.",
+    emptyTitle: "The first labs are being built",
+    emptyLede:
+      "Hands-on AWS cloud security labs will be published here as they are designed, implemented, tested, and documented.",
+    listLabel: "Cloud security labs",
+    cardAws: "AWS",
+    cardSecurity: "Security",
+    cardStages: ["Architecture", "Implementation", "Validation"],
+    viewLab: "View Lab",
+    github: "GitHub",
+  },
+
   // --- Sujets --------------------------------------------------------------
   topics: {
     metaTitle: "Cloud Security Topics | Bruno Arruda",
