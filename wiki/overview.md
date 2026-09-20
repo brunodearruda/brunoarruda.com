@@ -75,10 +75,12 @@ src/pages/[...locale]/index.astro is the reference:
 - The body is Navbar, a `<main>` of five sections (Hero, TopicStrip,
   WritersStrip, StudioNote, NewsletterInvite), Footer.
 
-A post (blog/[id].astro) multiplies `getStaticPaths` by the posts collection:
-one page per post AND per language, both under the same slug, which is what
-lets the language switcher land on the translation of the post being read. It
-carries an Article node plus breadcrumbList.
+A post (blog/[id].astro) multiplies `getStaticPaths` by the published posts in
+production, while development also gives drafts their noindex preview route.
+Each language keeps the same slug, which lets the language switcher land on the
+translation being read. The page carries an Article node with its visible topic
+as articleSection, plus breadcrumbList. Its metadata chooses an optional social
+image before the visible cover and the global default.
 
 A Lab follows the same reading layout but remains a separate collection. Its
 detail route emits TechArticle plus breadcrumbList, and metadata chooses an
@@ -114,8 +116,9 @@ the current URL, and on a 404 that URL exists in no language.
   canonical tags, pagination and the sitemap.
 - Scripts survive view transitions by re-init on astro:page-load or
   document-level delegation; `assetsInlineLimit: 0` keeps them addressable.
-- The contact form ships with no `action`, on purpose. Draft posts build for
-  preview but stay out of lists, RSS and llms.txt.
+- The contact form ships with no `action`, on purpose. Draft posts keep local
+  preview routes but stay out of production routes, lists, search, RSS, the
+  sitemap and llms.txt.
 
 ## Commands
 

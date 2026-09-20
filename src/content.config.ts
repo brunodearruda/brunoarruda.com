@@ -14,31 +14,46 @@ import { defineCollection, reference } from "astro:content";
 const posts = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/data/posts" }),
   schema: ({ image }) =>
-    z.object({
-      title: z.string(),
-      description: z.string(),
-      pubDate: z.coerce.date(),
-      // Renseignee uniquement si l'article a ete revu apres publication : le
-      // template affiche alors les deux dates, ce qui est plus honnete que de
-      // remplacer silencieusement la premiere.
-      updatedDate: z.coerce.date().optional(),
-      author: reference("authors"),
-      // Un sujet, pas une categorie fourre-tout. La reference est validee au
-      // build : un sujet mal orthographie casse la construction au lieu de
-      // produire une page d'archive vide en production.
-      topic: reference("topics"),
-      tags: z.array(z.string()).default([]),
-      // image() donne a Astro de quoi optimiser et connaitre les dimensions,
-      // ce qui evite le decalage de mise en page au chargement.
-      cover: image().optional(),
-      coverAlt: z.string().optional(),
-      // Un seul article a la une par langue. Le garde-fou est dans la page
-      // d'accueil, pas ici : le schema ne peut pas compter les autres fichiers.
-      featured: z.boolean().default(false),
-      // Un brouillon reste constructible en local mais sort des listes, du RSS
-      // et du llms.txt, et part en noindex.
-      draft: z.boolean().default(false),
-    }),
+    z
+      .object({
+        title: z.string(),
+        description: z.string(),
+        pubDate: z.coerce.date(),
+        // Renseignee uniquement si l'article a ete revu apres publication : le
+        // template affiche alors les deux dates, ce qui est plus honnete que de
+        // remplacer silencieusement la premiere.
+        updatedDate: z.coerce.date().optional(),
+        author: reference("authors"),
+        // Un sujet, pas une categorie fourre-tout. La reference est validee au
+        // build : un sujet mal orthographie casse la construction au lieu de
+        // produire une page d'archive vide en production.
+        topic: reference("topics"),
+        tags: z.array(z.string()).default([]),
+        // image() donne a Astro de quoi optimiser et connaitre les dimensions,
+        // ce qui evite le decalage de mise en page au chargement.
+        cover: image().optional(),
+        coverAlt: z.string().optional(),
+
+        // Carte sociale facultative, independante de la couverture visible.
+        socialImage: image().optional(),
+        socialImageAlt: z.string().optional(),
+
+        // Un seul article a la une par langue. Le garde-fou est dans la page
+        // d'accueil, pas ici : le schema ne peut pas compter les autres fichiers.
+        featured: z.boolean().default(false),
+        // Un brouillon reste constructible en local mais sort des listes, du RSS
+        // et du llms.txt, et part en noindex.
+        draft: z.boolean().default(false),
+      })
+      .superRefine((data, ctx) => {
+        if (data.socialImage && data.socialImageAlt === undefined) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["socialImageAlt"],
+            message: "socialImageAlt doit etre renseigne quand socialImage est present",
+          });
+        }
+      }),
 });
 
 // Les Labs techniques et les projets pratiques de securite cloud. Ils restent

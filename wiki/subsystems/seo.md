@@ -83,6 +83,6 @@ sharp. `pnpm og` regenerates them; run it after `pnpm rebrand`. Pages choose
 their card through the `image` prop of BaseLayout, whose shape requires alt
 text (src/layouts/BaseHead.astro:27).
 
-Labs may define `socialImage` plus `socialImageAlt` independently from their
-visible cover. src/js/metadata.ts enforces the selection order: social image,
-visible cover, global default.
+Posts and Labs may define `socialImage` plus `socialImageAlt` independently
+from their visible cover. src/js/metadata.ts enforces the selection order:
+social image, visible cover, global default.

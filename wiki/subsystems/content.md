@@ -26,9 +26,11 @@ Four collections, glob-loaded from src/data, validated by zod at build:
   file name is the shared slug (/blog/<slug>/). Frontmatter: title,
   description, publication date, a validated `reference("authors")`, a
   validated `reference("topics")` (a single topic, not a free-form category),
-  tags, an optional cover with alt text, `featured`, and `draft` defaulting to
-  false. Drafts still build for local preview but are filtered from lists, RSS
-  and llms.txt with `data.draft !== true`.
+  tags, an optional cover with alt text, an optional metadata-only social image
+  with alt text, `featured`, and `draft` defaulting to false. Social metadata
+  selects the social image before the cover and the global default. Drafts keep
+  a local preview route with noindex, but no production detail route; they are
+  also filtered from lists, search, RSS, the sitemap and llms.txt.
 - labs: Markdown or MDX technical case studies in src/data/labs. They remain a
   separate content type, but share validated author and topic references with
   posts. Draft Labs stay out of public lists and topic resource totals.

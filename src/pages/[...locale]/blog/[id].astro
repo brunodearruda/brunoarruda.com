@@ -7,9 +7,9 @@
 // permet au selecteur de langue d'emmener le lecteur sur LA traduction du
 // billet qu'il lit, et pas sur l'accueil.
 //
-// Un brouillon se construit toujours, pour etre relu en local sur sa vraie
-// page, mais part en noindex : il est deja hors des listes, du flux et de la
-// recherche (src/js/posts.ts), il ne manquait que la consigne aux robots.
+// Un brouillon garde sa vraie route dans le serveur de developpement et part
+// en noindex, mais aucune route n'est emise en production : il reste aussi hors
+// du sitemap, des listes, du flux et de la recherche.
 import Footer from "@components/Sections/Global/Footer.astro";
 import Navbar from "@components/Sections/Global/Navbar.astro";
 import PostBody from "@components/Sections/Post/PostBody.astro";
@@ -22,14 +22,18 @@ import { getSiteRoutes } from "@config/navData.json.ts";
 import siteData from "@config/siteData.json";
 import { defaultLocale, getLocale, localizePath, useTranslations } from "@i18n";
 import { entryLocale, entrySlug } from "@i18n/content";
+import { selectMetadataImage } from "@js/metadata";
 import { article, breadcrumbList } from "@js/schema";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import { getCollection, getEntry, render, type CollectionEntry } from "astro:content";
 
 export async function getStaticPaths() {
-  // getCollection et non getResolvedPosts : les brouillons doivent AVOIR une
-  // page, meme s'ils n'apparaissent nulle part ailleurs.
-  const posts = await getCollection("posts");
+  // getCollection et non getResolvedPosts : les brouillons doivent garder une
+  // page locale pour la relecture, sans entrer dans le build de production.
+  const posts = await getCollection(
+    "posts",
+    ({ data }) => import.meta.env.DEV || data.draft !== true,
+  );
 
   return Promise.all(
     posts.map(async (post) => {
@@ -79,12 +83,17 @@ const authorId = isSiteAuthor
   ? personId
   : new URL(`#person-${entrySlug(author.id)}`, authorUrl).href;
 
-// La couverture sert de carte de partage quand elle existe ; sinon l'image par
-// defaut du site. Les deux sont absolues, ce qu'exigent OG et schema.org.
+// La carte sociale explicite gagne, puis la couverture, puis l'image par defaut.
+// La selection reste separee du rendu visible de l'article.
 const cover = post.data.cover;
-const share = cover
-  ? { src: cover.src, alt: post.data.coverAlt ?? post.data.title }
-  : siteData.defaultImage;
+const socialImage = post.data.socialImage;
+const share = selectMetadataImage({
+  social: socialImage
+    ? { src: socialImage.src, alt: post.data.socialImageAlt ?? post.data.title }
+    : undefined,
+  cover: cover ? { src: cover.src, alt: post.data.coverAlt ?? post.data.title } : undefined,
+  fallback: siteData.defaultImage,
+});
 
 const articleSchema = article({
   title: post.data.title,
@@ -101,6 +110,7 @@ const articleSchema = article({
     jobTitle: author.data.role,
   },
   publisherId: personId,
+  articleSection: topic.data.name,
 });
 
 const crumbSchema = breadcrumbList([

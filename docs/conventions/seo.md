@@ -76,6 +76,6 @@ sitemap too; keep them in step.
   card via the `image` prop; alt text is mandatory in that prop's shape.
 - `noindex` is a prop, not a habit (BaseHead.astro:84): draft posts and
   utility pages use it; everything else stays indexable.
-- A Lab may set `socialImage` plus `socialImageAlt` without rendering that
-  image as its visible cover. Metadata chooses social image, then cover, then
-  the global default. The pure selection rule lives in src/js/metadata.ts.
+- A Post or Lab may set `socialImage` plus `socialImageAlt` without rendering
+  that image as its visible cover. Metadata chooses social image, then cover,
+  then the global default. The pure selection rule lives in src/js/metadata.ts.

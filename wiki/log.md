@@ -3,7 +3,7 @@
 title: Wiki log
 summary: Dated journal of code changes reflected in the wiki, and the list of open threads.
 sources: []
-updated: 2026-09-19
+updated: 2026-09-20
 ---
 
 # Wiki log
@@ -12,6 +12,15 @@ Newest entry first. Every `wiki sync` appends an entry here, even when
 nothing needed updating. Open threads are questions or known gaps waiting on
 a decision; close them by editing this list and noting the resolution in a
 dated entry.
+
+## 2026-09-20 - Draft articles and Article social metadata
+
+- Blog drafts keep their real route and noindex metadata in development, but
+  no detail route is emitted in production or added to the sitemap.
+- Blog Article structured data now carries the required visible topic as
+  articleSection.
+- Posts can select a metadata-only social image before their visible cover and
+  the global default, using the same shared selector as Labs.
 
 ## 2026-09-19 - Topics count articles and Labs
 
