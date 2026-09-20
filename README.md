@@ -1,246 +1,197 @@
-<!-- README.md - the front page of the repo: what Reef is, what it contains, how to run it, what to do before deploying. -->
+<!-- README.md - public overview of Bruno Arruda's Cloud Security portfolio and its implementation. -->
 
-<p align="center">
-  <img src="https://alohapixel.app/screenshots/theme-reef.webp" alt="Reef, a free bilingual blog theme for Astro: the home page hero, shown on desktop" width="720">
-</p>
+# Bruno Arruda - Cloud Security Portfolio
 
-<h1 align="center">Reef</h1>
+A security-first personal website and technical portfolio built with Astro and
+deployed on AWS. The project documents practical cloud security architecture,
+implementation decisions, secure CI/CD, operational evidence, and explicit
+trade-offs.
 
-<p align="center">
-  <b>A free, bilingual blog theme for Astro 7, light by default.</b><br>
-  Reading-first typography, MDX collections, art-directed light and dark modes,<br>
-  owned SEO, and an iOS / Android build from the same source.
-</p>
+**[Live Website](https://brunoarruda.com)** · **[Architecture Article](https://brunoarruda.com/blog/how-i-designed-a-security-first-aws-architecture/)** · **[Hands-on LAB](https://brunoarruda.com/labs/building-securing-static-website-aws/)**
 
-<p align="center">
-  <a href="https://reef.alohapixel.app"><b>Live demo</b></a>
-  &nbsp;·&nbsp;
-  <a href="https://reef.alohapixel.app/fr/">Version française</a>
-  &nbsp;·&nbsp;
-  <a href="#quick-start">Quick start</a>
-  &nbsp;·&nbsp;
-  <a href="https://alohapixel.app/themes/">The rest of the family</a>
-</p>
+## Architecture
 
-<p align="center">
-  <img alt="Astro 7" src="https://img.shields.io/badge/Astro-7-BC52EE?style=flat-square&logo=astro&logoColor=white">
-  <img alt="Tailwind CSS v4" src="https://img.shields.io/badge/Tailwind-v4-38BDF8?style=flat-square&logo=tailwindcss&logoColor=white">
-  <img alt="TypeScript strict" src="https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white">
-  <img alt="English and French" src="https://img.shields.io/badge/i18n-EN%20%2B%20FR-1D7F8D?style=flat-square">
-  <img alt="Free" src="https://img.shields.io/badge/price-free-FF7A59?style=flat-square">
-</p>
+The website separates public content delivery from deployment identity. These
+paths meet at the AWS resources they need, but they do not share permissions or
+trust assumptions.
 
----
+**Public delivery:** User -> Route 53 with DNSSEC -> CloudFront -> Origin Access
+Control -> private S3 origin
 
-A blog theme for Astro 7, by Aloha Pixel. One repository gives you the whole
-front of a writing publication: a home that leads with the latest piece, a
-paginated blog, topic and author pages, a reading column with a table of
-contents, and a per-language RSS feed. In English and in French, from the same
-source.
+**Deployment identity:** GitHub Actions -> OpenID Connect -> AWS Security Token
+Service -> scoped IAM role -> S3 deployment and CloudFront invalidation
 
-The demo publication is Reef Notes, a fictional three-person web studio's
-notebook: build logs, type specimens, and the unglamorous half of freelancing.
-Every word lives in a typed dictionary or in a Markdown post, never inside a
-component.
+![Two trust paths in Bruno Arruda's AWS website architecture: public delivery through Route 53, CloudFront, Origin Access Control and private S3, and deployment identity through GitHub Actions, OpenID Connect, AWS STS and a scoped IAM role.][architecture-diagram]
 
-Reef is built to be read. You get clean, commented, strictly typed source
-with a maintained wiki and agent tooling, not a black box.
+CloudFront is the intended public entry point. Amazon S3 is a private origin,
+not a public static website endpoint. Monitoring and audit evidence provide
+visibility around both paths without making them equivalent trust domains.
 
-## What is in the box, counted from this repo
+Read the [architecture article](https://brunoarruda.com/blog/how-i-designed-a-security-first-aws-architecture/)
+for the reasoning and trade-offs, or the [hands-on LAB](https://brunoarruda.com/labs/building-securing-static-website-aws/)
+for implementation details and validation evidence.
 
-Numbers below were counted from the source, not estimated (snapshot
-2026-08-30; `pnpm build` green, `pnpm check` clean).
+## Security Design
 
-| What | Count |
-|---|---|
-| Pages emitted by `pnpm build` | 55 |
-| Plain-text endpoints | robots.txt, llms.txt, per-language rss.xml, sitemap-index.xml |
-| Content collections (zod validated) | 3 (posts, authors, topics) |
-| Demo content entries | 9 posts, 3 authors, 5 topics, in 2 languages |
-| UI primitive families (src/components/ui) | 36, across 63 .astro files |
-| Primitive files that need a script tag | 10 of 63; the rest are pure HTML and CSS |
-| Section components | 24 |
-| Original hand-drawn icons | 60 |
-| animate-* utilities (motion catalog + brand tokens) | 55 + 3 |
-| Languages, from one page source each | 2 (English at the root, French under /fr/) |
-| Runtime dependencies | 9, every one listed in THIRD-PARTY.md |
+The implemented design includes:
 
-## Why it feels expensive
+- a private S3 origin with Block Public Access and no S3 website endpoint;
+- CloudFront Origin Access Control for service-to-service origin access;
+- Route 53 authoritative DNS with DNSSEC;
+- TLS through AWS Certificate Manager and HTTP-to-HTTPS redirection;
+- security headers and a hash-based Content Security Policy for the reviewed
+  executable inline script;
+- AWS WAF in monitor mode to establish visibility before enforcement;
+- CloudWatch alarms with an SNS notification path;
+- a multi-region CloudTrail trail for management-event audit records; and
+- GitHub Actions OIDC, AWS STS temporary credentials, and a scoped deployment
+  role following a least-privilege approach.
 
-- **Almost no JavaScript.** Dialogs are native `<dialog>`, accordions are
-  native `<details>`, the marquee is pure CSS. The scripts that ship are the
-  mobile drawer, the theme switch, the shrinking navbar and the reader's table
-  of contents, and all of them survive view transitions.
-- **A design system, not a stylesheet.** One file (src/styles/tokens.css)
-  defines the palette, semantic roles and generated utilities. Markup only
-  speaks roles (bg-primary, bg-card, text-muted-foreground), so
-  `pnpm rebrand "#yourhex"` repaints the theme, the favicon and the share
-  cards from a single colour.
-- **An owned SEO layer.** Canonical, Open Graph, JSON-LD builders, robots.txt,
-  llms.txt, a per-language RSS feed and the sitemap are hand-written, readable
-  files in the repo, not a plugin.
-- **Two themes, not one switch.** Semantic tokens invert under one `.dark`
-  class, applied before first paint, with zero flash. Light and dark do not
-  share a shadow recipe: dark swaps cast shadows for luminous borders.
-- **Bilingual by construction.** One page source per route, one output per
-  language, one post file per language under the same slug. The dictionary is
-  a typed object, so a missing French key is a build error, not a silently
-  English sentence in production.
-- **Accessibility as a feature.** 44px touch targets, correct aria wiring,
-  visible focus everywhere, and reduced motion honored at both the CSS and the
-  scroll-timeline layer.
+These controls have deliberate boundaries. WAF monitor mode does not
+automatically block requests. DNSSEC authenticates tested DNS responses but is
+not universal protection against every DNS failure. CSP reduces browser-side
+risk but does not prevent every form of cross-site scripting. The IAM policy is
+scoped to required deployment operations rather than claimed as a formally
+proven minimum. CloudTrail records the configured management events, not every
+possible AWS event, and this project does not claim that a manual log-integrity
+validation operation was executed.
 
-## Stack
+## Secure CI/CD
 
-Astro 7 (static output, no adapter), Tailwind CSS 4 (CSS-first, no config
-file), tailwind-variants, @astrojs/mdx (Markdown and MDX posts) and
-@astrojs/sitemap, self-hosted fonts via Fontsource (Space Grotesk, Instrument
-Sans, both OFL); the accent word of a heading keeps the heading font under a
-turquoise wave underline, so no third font loads. Node >= 22.18 and pnpm. No
-React, no animation library, no WebGL.
-
-## Quick start
-
-```bash
-pnpm install
-pnpm dev        # http://localhost:4321
-```
-
-`pnpm dev` fetches the demo photographs into `src/assets/` before the server
-starts, because the repository does not version them.
-
-All commands:
-
-```bash
-pnpm dev          # dev server
-pnpm build        # static site into dist/
-pnpm preview      # serve the build locally
-pnpm check        # astro check (types and templates)
-pnpm rebrand "#7a59ff"   # repaint the theme from one brand color
-pnpm rebrand --restore   # back to the Reef palette
-pnpm og           # regenerate the Open Graph cards in public/og/
-pnpm app          # build tuned for a native Capacitor shell
-
-# selfchecks, plain Node, no framework:
-node src/js/schema.selfcheck.ts
-node src/js/pagination.selfcheck.ts
-```
-
-## Structure
+The public [deployment workflow](.github/workflows/deploy.yml) uses this path:
 
 ```text
-src/
-  components/
-    ui/         36 primitive families (button, dialog, tabs, reveal, ...)
-    Sections/   24 sections, grouped by page (Home/, Post/, Archive/, Search/, Global/, Legal/)
-    svg/icons/  the 60-icon original set
-  config/       typed site data: siteData, navData, legalData
-  content.config.ts  the posts, authors and topics collections, zod schemas
-  data/         your content: posts (Markdown/MDX), authors and topics (JSON)
-  i18n/         the bilingual layer: config, helpers, en/ and fr/ dictionaries
-  js/           pure logic: JSON-LD builders, pagination, text utils
-  layouts/      BaseLayout + BaseHead (the entire <head>, hand-written)
-  pages/        [...locale]/ (index, blog, topics, authors, about, contact, legal), 404, robots, llms, rss
-  styles/       tokens.css, global.css, prose.css, the motion catalog
-scripts/        rebrand.mjs, og.mjs, app.mjs
-wiki/           how the theme works, anchored to the code
-docs/           the five convention files, one per subsystem
+GitHub Actions -> GitHub OIDC -> AWS STS -> scoped IAM role
+               -> S3 deployment -> CloudFront invalidation
 ```
 
-## Make it yours, in order
+No long-lived AWS access keys are stored in GitHub for this deployment. GitHub
+presents a signed OIDC identity, and AWS STS issues temporary credentials after
+the configured trust conditions are satisfied.
 
-1. **src/config/siteData.json.ts**: name, title, description, author. This is
-   the only file you must edit to change the publication identity.
-2. **astro.config.mjs**: set `site` to your production URL. It feeds canonical
-   URLs, OG tags, the sitemap, robots.txt, llms.txt and the RSS feed at once.
-3. `pnpm rebrand "#yourbrandcolor"`, then `pnpm og` to repaint the share cards.
-4. **src/data/**: replace the demo posts, authors and topics. One Markdown post
-   per language under the same slug.
-5. **src/i18n/ui/en/** and **src/i18n/ui/fr/**: all the interface copy. Nothing
-   displayed lives in a component.
-6. **src/config/navData.json.ts** and **legalData.json.ts**: your links, and the
-   privacy and terms copy. The bracketed fields to fill in are not there: they
-   are in the legal notice, in src/i18n/ui/en/pages.ts and src/i18n/ui/fr/pages.ts.
+Before AWS authentication, the workflow installs locked dependencies, runs
+project checks and linting, builds the site, and compares the generated home
+page's executable inline-script hash with the reviewed CSP hash. This is a
+focused drift guard for that home-page script. It does not validate every
+generated page or independently verify the complete deployed CSP.
 
-## Before you deploy
+## Validation and Operational Evidence
 
-- [ ] `site` in astro.config.mjs points at your real domain.
-- [ ] `demoNotice` in src/config/siteData.json.ts is already empty, so the
-      footer line saying "this site is a demo" does not render. Only put a key
-      back in that field if you want the line; there is no component to open.
-- [ ] `pnpm og` ran after your rebrand, so the cards in public/og/ carry your
-      colors and not Reef Notes'.
-- [ ] Legal copy in src/config/legalData.json.ts reviewed by a human who may
-      legally have an opinion, and the bracketed fields of the legal notice
-      (src/i18n/ui/en/pages.ts and src/i18n/ui/fr/pages.ts) filled in. It all
-      ships as a generic starting point, in both languages, and none of it is
-      legal advice.
-- [ ] The demo posts, authors and topics replaced with your own.
-- [ ] The contact form points at your own endpoint, or is removed. It ships
-      with no `action` on purpose (the note is at the top of contact.astro).
-- [ ] `pnpm check` and `pnpm build` are green, and the selfchecks pass.
+Representative point-in-time validation recorded during the implementation:
 
-Deploy dist/ to any static host: Cloudflare Pages, Netlify, Vercel, an nginx
-box. No adapter, no server, no environment variable required.
+- a tested direct S3 origin request returned `403 Forbidden` while CloudFront
+  continued serving the website;
+- a tested validating resolver authenticated the DNSSEC response;
+- expected navigation, search, theme, and refresh behavior continued under the
+  reviewed CSP without relevant browser-console violations;
+- a real CloudWatch alarm state transition executed the SNS notification path;
+  and
+- a production deployment completed through GitHub OIDC and temporary AWS
+  credentials.
 
-## Ship it as a native app (Capacitor)
+These results demonstrate the tested properties at the time of validation.
+They are not permanent guarantees. The LAB contains the detailed evidence,
+limitations, troubleshooting record, and accepted risks.
 
-Reef builds to plain static files with no server, no external CDN and local
-fonts, which is exactly what Capacitor wraps. Every fixed element respects
-`env(safe-area-inset-*)`, viewport heights use `svh` and never `vh`, touch
-targets are 44px, and no page overflows horizontally at 390x844.
+## Technical Case Study
+
+- **[How I Designed a Security-First AWS Architecture for My Website](https://brunoarruda.com/blog/how-i-designed-a-security-first-aws-architecture/)**
+  explains the architecture reasoning, trust boundaries, decisions, and
+  trade-offs.
+- **[Building and Securing a Production Static Website on AWS](https://brunoarruda.com/labs/building-securing-static-website-aws/)**
+  documents the implementation, validation, troubleshooting, operational
+  evidence, and accepted limitations.
+
+## Tech Stack
+
+- **Website:** Astro 7, TypeScript, Tailwind CSS 4, Markdown and MDX
+- **AWS delivery:** Amazon S3, Amazon CloudFront, Amazon Route 53, DNSSEC, and
+  AWS Certificate Manager
+- **Security and operations:** AWS WAF, CloudWatch, SNS, CloudTrail, IAM, and
+  AWS STS
+- **Delivery automation:** GitHub Actions and GitHub OIDC
+- **Quality controls:** Astro type checking, repository-specific linting,
+  self-checks, static production builds, and a responsive render bench
+
+The repository contains the website source and deployment workflow. It does
+not claim that the complete AWS environment is managed as Infrastructure as
+Code.
+
+## Repository Structure
+
+```text
+.github/workflows/   AWS deployment workflow and CI guardrails
+src/
+  assets/            Approved site, Article, LAB, and social images
+  components/        Astro sections and reusable UI components
+  data/posts/        Long-form Articles in Markdown or MDX
+  data/labs/         Technical Labs in Markdown or MDX
+  pages/             Static routes and discovery endpoints
+  styles/            Design tokens, global styles, and article prose
+public/              Favicons and global social metadata images
+docs/                Engineering and implementation conventions
+scripts/             Build, validation, asset, and render tooling
+wiki/                Maintained subsystem notes and change journal
+```
+
+## Run Locally
+
+Node.js 22.18 or newer and pnpm are required.
 
 ```bash
-pnpm app          # build tuned for a native shell
-npx cap add ios
-npx cap sync
-npx cap open ios
+corepack enable
+pnpm install
+pnpm dev
 ```
 
-`capacitor.config.ts` ships with the theme. The full guide, including the
-checklist Apple reviewers care about, is in
-[wiki/subsystems/mobile-app.md](wiki/subsystems/mobile-app.md).
+The local development server is available at `http://localhost:4321` by
+default.
 
-## Documentation
+Run the project quality checks with:
 
-- AGENTS.md: the operating manual (conventions, commands, gotchas), binding
-  for humans and agents alike.
-- docs/conventions/: the five convention files (astro, tailwind, typescript,
-  motion, seo), each anchored to real files in this repo. They are written to
-  be read by a human on day one and by any coding assistant afterwards.
-- wiki/: start at wiki/overview.md; each subsystem has its own anchored page.
-- THIRD-PARTY.md: the complete honest inventory (two OFL fonts, permissive
-  npm packages, and the photographs that ship with the demo).
+```bash
+pnpm check
+pnpm lint:house
+pnpm test
+pnpm build
+```
 
-## Questions
+`pnpm preview` serves the production build locally after `pnpm build`.
 
-Issues are turned off on this repository, and that is deliberate: support for
-this theme is handled in one place rather than two.
+## Security and Privacy
 
-- Something is wrong with the theme, or you want to tell us it helped:
-  https://alohapixel.app/contact/
-- The rest of the family:
-  https://alohapixel.app/themes/
+Public examples and documentation intentionally exclude sensitive
+infrastructure identifiers, credentials, tokens, and secrets. The repository
+demonstrates selected architecture and deployment controls rather than
+providing a complete export of the AWS environment.
 
-Pull requests are welcome all the same.
+## Project Origins
 
-## License
+This website started from [Reef](https://github.com/alohapixelcom-hash/reef),
+an open-source Astro theme by [Aloha Pixel](https://alohapixel.app). Reef is
+provided under the MIT license.
 
-MIT, full text in [LICENSE](LICENSE), which holds the MIT text and nothing else
-so that GitHub reads it correctly. Use it, fork it, sell what you build with it,
-no attribution required. Republishing Reef itself as your own theme is what the
-MIT license already allows, so there is nothing to negotiate here.
+Bruno adapted the theme into this Cloud Security portfolio and implemented the
+AWS architecture, security content, technical LAB, deployment workflow, and
+project-specific validation represented in this repository. The upstream
+theme's authorship and license remain credited; this repository does not claim
+ownership of the original Reef work.
 
-The photographs are covered separately, and [NOTICE.md](NOTICE.md) says so in
-full: the ten photographs in src/assets/ come from Pexels and carry the Pexels
-licence, which is free for commercial and personal use, requires no attribution
-and allows redistribution. Keep them in the site you publish with Reef, or
-replace them with your own; both are inside the licence. scripts/covers.mjs is a
-plain list of URLs, and a post with no cover falls back to a typographic card.
-PHOTOS.md names the Pexels page of every single file.
+## License and Third-Party Attribution
 
-NOTICE.md carries the rest of what the MIT grant does and does not reach: the
-photographs, the demo content, and the fonts and npm packages inventoried in
-THIRD-PARTY.md. Nothing there restricts the MIT grant.
+The upstream software license is preserved in [LICENSE](LICENSE). Additional
+licensing context and retained upstream notices are documented in
+[NOTICE.md](NOTICE.md). Dependency, font, and other third-party details are
+recorded in [THIRD-PARTY.md](THIRD-PARTY.md), with upstream media provenance in
+[PHOTOS.md](PHOTOS.md).
 
-Provided as is, without warranty.
+## Author
+
+**Bruno Arruda**<br>
+Cloud Security & Infrastructure Professional
+
+- [Website](https://brunoarruda.com)
+- [LinkedIn](https://www.linkedin.com/in/brunodearruda)
+- [GitHub](https://github.com/brunodearruda)
+
+[architecture-diagram]: src/assets/articles/how-i-designed-a-security-first-aws-architecture/security-first-aws-architecture.png
